@@ -21,12 +21,20 @@ router.get("/sign-out", function(req, res) {
 });
 
 // MANAGE PROFILE
-// router.get(
-//   "/profile",
-//   passport.authenticate("jwt", {
-//     session: false
-//   }),
-//   ProfileController
-// );
+router.get(
+  "/profile",
+  passport.authenticate("jwt", {
+    session: false
+  }),
+  ProfileController.getProfile
+);
+router.post(
+  "/profile/update",
+  passport.authenticate("jwt", {
+    session: false
+  }),
+  ProfileController.updateProfile
+);
+
 
 module.exports = router;

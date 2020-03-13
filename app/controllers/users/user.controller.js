@@ -4,14 +4,13 @@ const jwt = require("jsonwebtoken");
 const { bcrypt, getSalt } = require("../../utils/Encrypt/bcrypt");
 const { JWT_SECRET, expireTime } = require("../constants");
 const {
-  oauth2Client,
-  google,
+  oauth,
   googleAuth
 } = require("../../utils/Authentication/googleOauth");
 
 function validateEmail(email) {
   var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
+  return re.test(String(email).toLowerCase()) && email.length > 0;
 }
 
 function validatePassword(password) {
@@ -19,33 +18,29 @@ function validatePassword(password) {
   return re.test(String(password));
 }
 
-getToken = user => {
+function getToken(user) {
   let data = {
+    userId: user.id_user,
     firstName: user.first_name,
     lastName: user.last_name,
-    avatar: user.avatar,
-    email: user.email,
-    googleId: user.googleId,
-    facebookId: user.facebookId
+    avatar: user.avatar
   };
-
   const token = jwt.sign(data, JWT_SECRET, {
     expiresIn: expireTime + "m"
   });
-
   return token;
-};
+}
 
 module.exports = {
   signUp: async (req, res, next) => {
     const { email, password, firstName, lastName } = req.body;
 
-    if (!validateEmail(email) || email.length === 0) {
+    if (!validateEmail(email)) {
       return res.status(400).json({
         message: "Email is incorrect"
       });
     }
-    if (!validatePassword(password) || password.length === 0) {
+    if (!validatePassword(password)) {
       return res.status(400).json({
         message:
           "Password has to be at least 8 characters, contains at least 1 digit, 1 lower case, 1 upper case"
@@ -89,7 +84,12 @@ module.exports = {
           }
         });
       }
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+      return res.status(400).json({
+        message: "Sign up failed"
+      });
+    }
   },
   signIn: async (req, res, next) => {
     passport.authenticate(
@@ -118,13 +118,7 @@ module.exports = {
         message: "You should provide access_token"
       });
     }
-    oauth2Client.setCredentials({
-      access_token
-    });
-    const oauth2 = google.oauth2({
-      auth: oauth2Client,
-      version: "v2"
-    });
+    const oauth2 = oauth(access_token);
     oauth2.userinfo.get(async (err, response) => {
       if (err) {
         console.log(access_token);
@@ -142,7 +136,7 @@ module.exports = {
           });
         } else {
           return res.status(400).json({
-            message: "Something wrong with google oauth"
+            message: "Something wrong with google access_token"
           });
         }
       }
@@ -154,10 +148,13 @@ module.exports = {
       {
         session: false
       },
-      (err, user, message) => {
+      (err, user) => {
         if (err || !user) {
           return res.status(400).json({
-            message: message === null ? err.message : message.message
+            message:
+              err !== null
+                ? err.message
+                : "Something wrong with facebook access_token"
           });
         }
         return res.json({

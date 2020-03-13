@@ -14,9 +14,9 @@ const Otp = db.sequelize.define(
   { timestamps: true, createdAt: true, updatedAt: false }
 );
 
-User.hasMany(User_Role);
+Otp.belongsTo(User);
 
-User.sync().then(() => {
+Otp.sync().then(() => {
   // console.log("Users table created");
 });
 

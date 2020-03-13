@@ -8,12 +8,12 @@ const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
+const Op = require("sequelize").Op;
+
 const UserModel = require("../../models/users.model");
 
 require("dotenv").config();
 const JWT_SECRET = process.env.JWT_SECRET || "jwt_secret";
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
 const facebookClientId = process.env.FACEBOOK_CLIENT_ID;
 const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET;
 
@@ -32,26 +32,16 @@ const jwt = new JWTStrategy(
   async (jwtPayload, cb) => {
     try {
       let existedUser = await UserModel.findAll({
-        where: {
-          [Op.or]: [
-            { email: jwtPayload.email },
-            { googleId: jwtPayload.googleId },
-            { facebookId: jwtPayload.facebookId }
-          ]
-        }
+        where: { id_user: jwtPayload.userId }
       });
       if (existedUser.length !== 0) {
-        return cb(null, {
-          message: "Found user",
-          user: existedUser[0].dataValues
-        });
+        return cb(null, existedUser[0].dataValues);
       } else {
-        return cb(null, {
-          message: "Not found user",
-          user: null
-        });
+        return cb(null, false, { message: "Not found user" });
       }
     } catch (e) {
+      console.log(e);
+
       return cb(e);
     }
   }
@@ -71,6 +61,8 @@ const local = new LocalStrategy(
       });
       if (existedUser.length > 0) {
         let user = existedUser[0].dataValues;
+        if (user.is_verified === false)
+          return cb(null, false, "User is not verified.");
         bcrypt.compare(password, user.password, (err, res) => {
           if (res) {
             // console.log(user);
@@ -91,8 +83,6 @@ const facebook = new facebookStrategy(
     clientSecret: facebookClientSecret
   },
   async (accessToken, refreshToken, profile, cb) => {
-    console.log(profile);
-
     // Check existed user
     try {
       let existedUser = await UserModel.findAll({
@@ -104,11 +94,11 @@ const facebook = new facebookStrategy(
         let user = existedUser[0].dataValues;
         return cb(null, user);
       } else {
-        let newUser = UserModel.create({
+        let newUser = await UserModel.create({
           first_name: profile.name.givenName,
           last_name: profile.name.familyName,
           facebookId: profile.id,
-          avatar: profile.photos[0].value,
+          avatar: profile.photos[0].value
         });
         return cb(null, newUser);
       }

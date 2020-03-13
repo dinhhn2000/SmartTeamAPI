@@ -12,11 +12,16 @@ const User = db.sequelize.define("Users", {
   last_name: { type: DataTypes.STRING },
   avatar: { type: DataTypes.STRING, allowNull: true },
   dob: { type: DataTypes.DATE, allowNull: true },
-  gender: { type: DataTypes.INTEGER, allowNull: true },
+  gender: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    vaidate: { isIn: [["Male", "Female", "Not identify"]] }
+  },
   email: { type: DataTypes.STRING, allowNull: true },
   password: { type: DataTypes.STRING, allowNull: true },
   googleId: { type: DataTypes.STRING, allowNull: true },
-  facebookId: { type: DataTypes.STRING, allowNull: true }
+  facebookId: { type: DataTypes.STRING, allowNull: true },
+  is_verified: {type: DataTypes.BOOLEAN, defaultValue: false}
 });
 
 User.hasMany(User_Role);

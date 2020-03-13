@@ -5,8 +5,15 @@ const oauth2Client = new OAuth2();
 const UserModel = require("../../models/users.model");
 
 module.exports = {
-  oauth2Client,
-  google,
+  oauth: access_token => {
+    oauth2Client.setCredentials({
+      access_token
+    });
+    return google.oauth2({
+      auth: oauth2Client,
+      version: "v2"
+    });
+  },
   googleAuth: async user => {
     try {
       let existedUser = await UserModel.findAll({
