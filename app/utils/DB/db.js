@@ -1,5 +1,4 @@
 "use strict";
-
 const Sequelize = require("sequelize");
 const sequelize = new Sequelize("smartteam", "postgres", "123456", {
   host: "localhost",

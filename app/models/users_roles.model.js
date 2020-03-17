@@ -1,6 +1,5 @@
+"use strict";
 const { DataTypes, Deferrable } = require("sequelize");
-const User = require("./users.model");
-const Role = require("./roles.model");
 const db = require("../utils/DB/db");
 
 const User_Role = db.sequelize.define(
