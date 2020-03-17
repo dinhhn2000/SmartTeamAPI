@@ -44,5 +44,10 @@ router.post(
 );
 router.post("/change-password", UserController.changePassword);
 router.post("/change-password/verify", UserController.verifyChangePassword);
+router.post(
+  "/set-role",
+  passport.authenticate("jwt", { session: false }),
+  ProfileController.setRole
+);
 
 module.exports = router;

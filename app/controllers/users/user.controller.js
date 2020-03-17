@@ -75,7 +75,7 @@ module.exports = {
             sendEmail(message);
 
             return response.created(res, "Sign up successful");
-          }
+          } else throw error;
         });
       }
     } catch (e) {
@@ -164,8 +164,6 @@ module.exports = {
           [Op.and]: [{ otp }, { type: 1 }, { email }]
         }
       });
-      console.log(!!existedOtp);
-
       if (!!existedOtp) {
         let otpRecord = existedOtp.dataValues;
         if (validateOtpTime(otpRecord.createdAt)) {

@@ -10,6 +10,7 @@ const {
 } = require("../../utils/Authentication/validations");
 const UserModel = require("../../models/users.model");
 const RoleModel = require("../../models/roles.model");
+const UserRoleModel = require("../../models/users_roles.model");
 const { JWT_SECRET, expireTime } = require("../constants");
 
 function getToken(user) {
@@ -89,6 +90,30 @@ module.exports = {
     } catch (e) {
       // console.log(e);
       return response.error(res, "Something wrong when update avatar", e);
+    }
+  },
+  setRole: async (req, res, next) => {
+    const { user } = req;
+    const { userId, roleId } = req.body;
+    try {
+      let userRoleRecord = await UserRoleModel.findOne({
+        where: { id_user: user.id_user }
+      });
+      userRoleRecord = !!userRoleRecord ? userRoleRecord.dataValues : null;
+      if (userRoleRecord === null) throw "Your account do not have role";
+      if (!userId || !roleId) throw "Missing userId or roleId";
+      if (userRoleRecord.id_role <= roleId) {
+        const upsertResult = await UserRoleModel.upsert(
+          { id_user: userId, id_role: roleId },
+          { id_role: roleId, id_user: userId }
+        );
+        if (upsertResult) {
+          return response.accepted(res, "Set role success");
+        } else throw "Upsert role failed";
+      } else throw "Cannot set higher role than yours for this user";
+    } catch (e) {
+      console.log(e);
+      return response.error(res, "Cannot set role", e);
     }
   }
 };
