@@ -1,35 +1,16 @@
 const jwt = require("jsonwebtoken");
-const moment = require("moment");
+const response = require("../../utils/Responses");
+const cloudinary = require("cloudinary").v2;
 
+const {
+  validateEmail,
+  validateString,
+  convertDateToDATE,
+  validateGender
+} = require("../../utils/Authentication/validations");
 const UserModel = require("../../models/users.model");
 const RoleModel = require("../../models/roles.model");
-// const { bcrypt, getSalt } = require("../../utils/Encrypt/bcrypt");
 const { JWT_SECRET, expireTime } = require("../constants");
-
-function validateEmail(email) {
-  var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-}
-
-function validatePassword(password) {
-  var re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
-  return re.test(String(password));
-}
-
-function validateString(arrayInput, fieldName) {
-  return arrayInput.map((input, index) => {
-    if (input === undefined) return null;
-    if (input.length === 0) return null;
-    return input;
-  });
-}
-
-function validateDate(date, fieldName) {
-  if (!moment.invalid(date)) {
-    return moment(new Date(date)).format("X");
-  }
-  throw `${fieldName} is not in correct format`;
-}
 
 function getToken(user) {
   let data = {
@@ -50,9 +31,7 @@ module.exports = {
   getProfile: async (req, res, next) => {
     let { user } = req;
     if (!user) {
-      return res.status(400).json({
-        message: req.message
-      });
+      return response.error(res, req.message);
     }
     let profile = {
       firstName: user.first_name,
@@ -62,19 +41,21 @@ module.exports = {
       gender: user.gender,
       dob: user.dob
     };
-    res.status(200).json({
-      profile
-    });
+    return response.success(res, "Get profile success", profile);
   },
   updateProfile: async (req, res, next) => {
     try {
       let { user } = req;
-      let { firstName, lastName, dob, gender } = req.body;
-      [firstName, lastName, gender] = validateString(
-        [firstName, lastName, gender],
-        ["firstName", "lastName", "avatar", "gender"]
+      let { firstName, lastName, dob, gender, email } = req.body;
+      [firstName, lastName, gender, email] = validateString(
+        [firstName, lastName, gender, email],
+        ["firstName", "lastName", "gender", "email"]
       );
-      dob = validateDate(dob, "dob");
+      if (!validateEmail(email) && email !== null)
+        throw `email is not in correct format`;
+      dob = dob === undefined ? null : convertDateToDATE(dob, "dob");
+      validateGender(gender);
+
       await UserModel.update(
         {
           first_name: firstName === null ? user.first_name : firstName,
@@ -82,19 +63,32 @@ module.exports = {
           dob: dob === null ? user.dob : dob,
           gender: gender === null ? user.gender : gender
         },
-        {
-          where: {
-            id_user: user.id_user
-          }
-        }
+        { where: { id_user: user.id_user } }
       );
-      return res.json({ message: "Update profile success" });
+
+      return response.success(res, "Update profile success");
+    } catch (e) {
+      console.log(e);
+      return response.error(res, "Something wrong when update profile", e);
+    }
+  },
+  updateAvatar: async (req, res, next) => {
+    try {
+      const { user } = req;
+
+      let uploadResult = await cloudinary.uploader.upload(req.file.path);
+
+      await UserModel.update(
+        {
+          avatar: uploadResult.url
+        },
+        { where: { id_user: user.id_user } }
+      );
+
+      return response.success(res, "Update avatar success", uploadResult.url);
     } catch (e) {
       // console.log(e);
-      return res.status(400).json({
-        message: "Something wrong when update profile",
-        error: e
-      });
+      return response.error(res, "Something wrong when update avatar", e);
     }
   }
 };

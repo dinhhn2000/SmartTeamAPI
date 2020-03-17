@@ -8,8 +8,6 @@ const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
-const Op = require("sequelize").Op;
-
 const UserModel = require("../../models/users.model");
 
 require("dotenv").config();
@@ -31,17 +29,16 @@ const jwt = new JWTStrategy(
   },
   async (jwtPayload, cb) => {
     try {
-      let existedUser = await UserModel.findAll({
+      let existedUser = await UserModel.findOne({
         where: { id_user: jwtPayload.userId }
       });
       if (existedUser.length !== 0) {
-        return cb(null, existedUser[0].dataValues);
+        return cb(null, existedUser.dataValues);
       } else {
         return cb(null, false, { message: "Not found user" });
       }
     } catch (e) {
       console.log(e);
-
       return cb(e);
     }
   }
@@ -98,7 +95,8 @@ const facebook = new facebookStrategy(
           first_name: profile.name.givenName,
           last_name: profile.name.familyName,
           facebookId: profile.id,
-          avatar: profile.photos[0].value
+          avatar: profile.photos[0].value,
+          is_verified: true
         });
         return cb(null, newUser);
       }

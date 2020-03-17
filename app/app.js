@@ -5,6 +5,7 @@ const logger = require("morgan");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const passport = require("passport");
+const cloudinary = require("cloudinary").v2;
 require("./utils/Authentication/passport");
 
 const routes = require("./routes/index");
@@ -15,6 +16,13 @@ var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
+
+// cloudinary config
+cloudinary.config({
+  cloud_name: "dc4rxxjyt",
+  api_key: "182393896791142",
+  api_secret: "g95hnkYtxrJWTGY0FfSDs0yms5w"
+});
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));

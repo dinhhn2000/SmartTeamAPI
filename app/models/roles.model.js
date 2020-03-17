@@ -15,7 +15,15 @@ Role.sync().then(async () => {
   try {
     await Role.findOrCreate({
       where: { id_role: 1 },
-      default: { name: "Super Admin" }
+      defaults: { name: "Super Admin" }
+    });
+    await Role.findOrCreate({
+      where: { id_role: 2 },
+      defaults: { name: "Admin" }
+    });
+    await Role.findOrCreate({
+      where: { id_role: 3 },
+      defaults: { name: "Member" }
     });
   } catch (e) {
     console.log(e);

@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const User_Role = require("./users_roles.model");
+const { bcrypt, getSalt } = require("../utils/Encrypt/bcrypt");
 const db = require("../utils/DB/db");
 
 const User = db.sequelize.define("Users", {
@@ -14,20 +14,39 @@ const User = db.sequelize.define("Users", {
   dob: { type: DataTypes.DATE, allowNull: true },
   gender: {
     type: DataTypes.STRING,
-    allowNull: true,
-    vaidate: { isIn: [["Male", "Female", "Not identify"]] }
+    allowNull: false,
+    defaultValue: "Male"
   },
   email: { type: DataTypes.STRING, allowNull: true },
   password: { type: DataTypes.STRING, allowNull: true },
   googleId: { type: DataTypes.STRING, allowNull: true },
   facebookId: { type: DataTypes.STRING, allowNull: true },
-  is_verified: {type: DataTypes.BOOLEAN, defaultValue: false}
+  is_verified: { type: DataTypes.BOOLEAN, defaultValue: false }
 });
 
-User.hasMany(User_Role);
-
-User.sync().then(() => {
+User.sync().then(async () => {
   // console.log("Users table created");
+  try {
+    let salt = await getSalt();
+    bcrypt.hash("admin", salt, async (error, hash) => {
+      if (!error) {
+        await User.findOrCreate({
+          where: { id_user: 1 },
+          defaults: {
+            first_name: "admin",
+            last_name: "admin",
+            avatar: "",
+            gender: "Not identify",
+            email: "admin@gmail.com",
+            password: hash,
+            is_verified: true
+          }
+        });
+      } else throw error;
+    });
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 module.exports = User;

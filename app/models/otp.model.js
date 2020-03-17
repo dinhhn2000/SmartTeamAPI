@@ -9,15 +9,20 @@ const Otp = db.sequelize.define(
       type: DataTypes.INTEGER,
       primaryKey: true
     },
-    otp: { type: DataTypes.INTEGER }
+    otp: { type: DataTypes.INTEGER, unique: true, primaryKey: true },
+    email: { type: DataTypes.STRING },
+    type: {
+      type: DataTypes.INTEGER
+      // 1: verify account
+      // 2: reset password
+      // 3: ...
+    }
   },
-  { timestamps: true, createdAt: true, updatedAt: false }
+  { timestamps: true, createdAt: "createdAt", updatedAt: false }
 );
-
-Otp.belongsTo(User);
 
 Otp.sync().then(() => {
   // console.log("Users table created");
 });
 
-module.exports = User;
+module.exports = Otp;
