@@ -1,3 +1,4 @@
+"use strict";
 const nodemailer = require("nodemailer");
 require("dotenv").config();
 const mail = process.env.EMAIL || "tutorreact@gmail.com";

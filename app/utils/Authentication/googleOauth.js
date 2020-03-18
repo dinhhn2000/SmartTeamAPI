@@ -1,13 +1,10 @@
-require("dotenv").config();
-const googleClientId = process.env.GOOGLE_CLIENT_ID;
-const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
-
+"use strict";
 const google = require("googleapis").google;
 const OAuth2 = google.auth.OAuth2;
 const oauth2Client = new OAuth2(googleClientId, googleClientSecret);
 
-const UserModel = require("../../models/users.model");
-
+const { UserModel } = require("../../models");
+const { googleClientId, googleClientSecret } = require("../Constants");
 module.exports = {
   oauth: async access_token => {
     try {

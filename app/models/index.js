@@ -1,3 +1,4 @@
+"use strict";
 const OtpModel = require("./otp.model");
 const PriorityModel = require("./priorities.model");
 const ProjectUserModel = require("./project_user.model");
@@ -9,7 +10,6 @@ const TeamModel = require("./teams.model");
 const UserModel = require("./users.model");
 
 const { bcrypt, getSalt } = require("../utils/Encrypt");
-
 
 module.exports = {
   sync: async () => {
@@ -115,5 +115,14 @@ module.exports = {
     } catch (e) {
       console.log(e);
     }
-  }
+  },
+  OtpModel,
+  PriorityModel,
+  ProjectUserModel,
+  ProjectModel,
+  RoleModel,
+  StateModel,
+  TeamUserModel,
+  TeamModel,
+  UserModel
 };

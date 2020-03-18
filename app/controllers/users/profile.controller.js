@@ -1,3 +1,4 @@
+"use strict";
 const jwt = require("jsonwebtoken");
 const response = require("../../utils/Responses");
 const cloudinary = require("cloudinary").v2;
@@ -8,9 +9,8 @@ const {
   convertDateToDATE,
   validateGender
 } = require("../../utils/Authentication/validations");
-const UserModel = require("../../models/users.model");
-// const RoleModel = require("../../models/roles.model");
-const { JWT_SECRET, expireTime } = require("../constants");
+const { UserModel } = require("../../models");
+const { JWT_SECRET, expireTime } = require("../../utils/Constants");
 
 function getToken(user) {
   let data = {
@@ -90,7 +90,7 @@ module.exports = {
       // console.log(e);
       return response.error(res, "Something wrong when update avatar", e);
     }
-  },
+  }
   // setRole: async (req, res, next) => {
   //   const { user } = req;
   //   const { userId, roleId } = req.body;

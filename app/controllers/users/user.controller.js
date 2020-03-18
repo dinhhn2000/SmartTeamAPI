@@ -1,18 +1,17 @@
+"use strict";
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
-const response = require("../../utils/Responses");
+const { Op } = require("sequelize");
 
+const response = require("../../utils/Responses");
 const {
   validateEmail,
   validatePassword,
   validateOtpTime
 } = require("../../utils/Authentication/validations");
-const { Op } = require("sequelize");
-
-const UserModel = require("../../models/users.model");
-const OtpModel = require("../../models/otp.model");
+const { UserModel, OtpModel } = require("../../models");
 const { bcrypt, getSalt } = require("../../utils/Encrypt");
-const { JWT_SECRET, expireTime } = require("../constants");
+const { JWT_SECRET, expireTime } = require("../../utils/Constants");
 const { oauth, googleAuth } = require("../../utils/Authentication/googleOauth");
 const { sendEmail, createMessage } = require("../../utils/Email");
 

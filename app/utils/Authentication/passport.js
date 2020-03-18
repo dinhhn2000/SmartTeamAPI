@@ -1,3 +1,4 @@
+"use strict";
 const passport = require("passport");
 const passportJWT = require("passport-jwt");
 const passportLocal = require("passport-local");
@@ -8,12 +9,12 @@ const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
-const UserModel = require("../../models/users.model");
-
-require("dotenv").config();
-const JWT_SECRET = process.env.JWT_SECRET || "jwt_secret";
-const facebookClientId = process.env.FACEBOOK_CLIENT_ID;
-const facebookClientSecret = process.env.FACEBOOK_CLIENT_SECRET;
+const { UserModel } = require("../../models");
+const {
+  JWT_SECRET,
+  facebookClientId,
+  facebookClientSecret
+} = require("../Constants");
 
 passport.serializeUser((user, done) => {
   done(null, user);

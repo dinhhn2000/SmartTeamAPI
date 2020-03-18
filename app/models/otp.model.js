@@ -1,5 +1,5 @@
+"use strict";
 const { DataTypes } = require("sequelize");
-const User = require("./users.model");
 const db = require("../utils/DB/db");
 
 const Otp = db.sequelize.define(

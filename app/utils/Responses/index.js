@@ -1,3 +1,4 @@
+"use strict";
 module.exports = {
   success: (response, message, payload) => {
     if (typeof payload !== "undefined")

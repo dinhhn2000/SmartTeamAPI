@@ -1,6 +1,6 @@
+"use strict";
 const response = require("../../utils/Responses");
-const ProjectModel = require("../../models/project.model");
-const ProjectUserModel = require("../../models/project_user.model");
+const { ProjectModel, ProjectUserModel } = require("../../models");
 
 module.exports = {
   createProject: async (req, res, next) => {
@@ -20,7 +20,7 @@ module.exports = {
         id_user: user.id_user,
         id_role: 2,
         id_project: newProject.id_project
-      })
+      });
       console.log(newProject);
 
       return response.created(res, "Create project success");
