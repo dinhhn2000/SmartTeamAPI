@@ -11,10 +11,10 @@ const { Op } = require("sequelize");
 
 const UserModel = require("../../models/users.model");
 const OtpModel = require("../../models/otp.model");
-const { bcrypt, getSalt } = require("../../utils/Encrypt/bcrypt");
+const { bcrypt, getSalt } = require("../../utils/Encrypt");
 const { JWT_SECRET, expireTime } = require("../constants");
 const { oauth, googleAuth } = require("../../utils/Authentication/googleOauth");
-const { sendEmail, createMessage } = require("../../utils/Email/emailVerify");
+const { sendEmail, createMessage } = require("../../utils/Email");
 
 function getToken(user) {
   let data = {

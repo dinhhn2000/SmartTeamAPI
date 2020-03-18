@@ -1,5 +1,5 @@
 "use strict";
-const { bcrypt, getSalt } = require("../utils/Encrypt/bcrypt");
+const { bcrypt, getSalt } = require("../utils/Encrypt");
 
 module.exports = {
   up: (queryInterface, Sequelize) => {

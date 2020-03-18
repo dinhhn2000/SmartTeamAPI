@@ -2,8 +2,8 @@
 const { DataTypes, Deferrable } = require("sequelize");
 const db = require("../utils/DB/db");
 
-const Project_User = db.sequelize.define(
-  "Project_User",
+const Team_User = db.sequelize.define(
+  "Team_User",
   {
     id_user: {
       type: DataTypes.INTEGER,
@@ -14,12 +14,12 @@ const Project_User = db.sequelize.define(
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
-    id_project: {
+    id_team: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       references: {
-        model: "Projects",
-        key: "id_project",
+        model: "Teams",
+        key: "id_team",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
@@ -36,5 +36,5 @@ const Project_User = db.sequelize.define(
   { freezeTableName: true }
 );
 
-// Project_User.sync().then(async () => {});
-module.exports = Project_User;
+// Team_User.sync().then(async () => {});
+module.exports = Team_User;

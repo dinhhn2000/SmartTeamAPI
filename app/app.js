@@ -6,10 +6,16 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const cloudinary = require("cloudinary").v2;
+
+require("dotenv").config();
+const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
+const api_key = process.env.CLOUDINARY_API_KEY;
+const api_secret = process.env.CLOUDINARY_API_SECRET;
 require("./utils/Authentication/passport");
 
 const routes = require("./routes/index");
 const users = require("./routes/users.route");
+const projects = require("./routes/projects.route");
 
 var app = express();
 
@@ -18,11 +24,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "jade");
 
 // cloudinary config
-cloudinary.config({
-  cloud_name: "dc4rxxjyt",
-  api_key: "182393896791142",
-  api_secret: "g95hnkYtxrJWTGY0FfSDs0yms5w"
-});
+cloudinary.config({ cloud_name, api_key, api_secret });
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -33,8 +35,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 
+// Sync a model
+require("./models").sync();
+
 app.use("/", routes);
 app.use("/users", users);
+app.use("/projects", projects);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

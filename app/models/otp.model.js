@@ -21,8 +21,8 @@ const Otp = db.sequelize.define(
   { timestamps: true, createdAt: "createdAt", updatedAt: false }
 );
 
-Otp.sync().then(() => {
-  // console.log("Users table created");
-});
+// Otp.sync().then(() => {
+//   // console.log("Users table created");
+// });
 
 module.exports = Otp;
