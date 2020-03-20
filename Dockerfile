@@ -1,4 +1,4 @@
-FROM node:10
+FROM node:13.10.1-alpine3.10
 
 RUN mkdir /src
 
@@ -7,6 +7,7 @@ RUN npm install nodemon -g
 
 WORKDIR /src
 ADD app/package.json /src/package.json
+ADD app/wait-for-it.sh /src/wait-for-it.sh
 RUN npm install
 
 EXPOSE 3000

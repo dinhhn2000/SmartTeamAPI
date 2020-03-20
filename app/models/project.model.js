@@ -1,6 +1,6 @@
 "use strict";
 const { DataTypes, Deferrable } = require("sequelize");
-const db = require("../utils/DB/db");
+const db = require("../utils/DB");
 
 const Project = db.sequelize.define(
   "Projects",
@@ -30,7 +30,7 @@ const Project = db.sequelize.define(
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: true
     },
     state: {
       type: DataTypes.INTEGER,
@@ -49,6 +49,10 @@ const Project = db.sequelize.define(
         key: "id_priority",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
+    },
+    finishedAt: {
+      allowNull: false,
+      type: DataTypes.DATE
     }
   },
   { timestamps: true, createdAt: "createdAt", updatedAt: false }

@@ -1,6 +1,6 @@
 "use strict";
 const { DataTypes, Deferrable } = require("sequelize");
-const db = require("../utils/DB/db");
+const db = require("../utils/DB");
 
 const Team = db.sequelize.define(
   "Teams",

@@ -1,13 +1,19 @@
 "use strict";
+const constants = require("../Constants");
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize("smartteam", "postgres", "123456", {
-  host: "localhost",
-  dialect: "postgres",
-  logging: false,
-  define: {
-    timestamps: false
+const sequelize = new Sequelize(
+  constants.dbName,
+  constants.dbUserName,
+  constants.dbPassword,
+  {
+    host: constants.dbHost,
+    dialect: constants.dbDialect,
+    logging: false,
+    define: {
+      timestamps: false
+    }
   }
-});
+);
 var db = {};
 
 async function authenticate() {

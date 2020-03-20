@@ -1,6 +1,6 @@
 "use strict";
 const { DataTypes, Deferrable } = require("sequelize");
-const db = require("../utils/DB/db");
+const db = require("../utils/DB");
 
 const Project_User = db.sequelize.define(
   "Project_User",
@@ -25,7 +25,7 @@ const Project_User = db.sequelize.define(
     },
     id_role: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
+      allowNull: false,
       references: {
         model: "Roles",
         key: "id_role",

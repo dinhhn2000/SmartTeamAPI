@@ -23,6 +23,8 @@ module.exports = {
   },
 
   convertDateToDATE: (date, fieldName) => {
+    if (new Date(parseInt(date)).getTime() !== parseInt(date))
+      throw `${fieldName} is not in correct format, must be timestamp`;
     let checkDate = moment(new Date(parseInt(date)));
     if (checkDate.isValid()) {
       const result = moment(new Date(parseInt(date))).format(
@@ -30,7 +32,6 @@ module.exports = {
       );
       return result;
     }
-    throw `${fieldName} is not in correct format, must be timestamp`;
   },
 
   validateOtpTime: date => {
@@ -48,5 +49,20 @@ module.exports = {
     if (gender != null)
       if (!validator.isIn(gender, ["Male", "Female", "Not identify"]))
         throw `gender must be 'Male', 'Female', 'Not identify'`;
+  },
+
+  validateProjectInfoType: (
+    name,
+    priority,
+    teamId,
+    finishedAt
+  ) => {
+    if (typeof name === "undefined") throw "Missing name field";
+    if (typeof priority === "undefined") throw "Missing priority field";
+    if (typeof teamId === "undefined") throw "Missing teamId field";
+    if (typeof finishedAt === "undefined") throw "Missing finishedAt field";
+    if (typeof name !== "string") throw "name field must be string";
+    if (typeof priority === "integer") throw "priority field must be integer";
+    if (typeof teamId === "integer") throw "teamId field must be integer";
   }
 };

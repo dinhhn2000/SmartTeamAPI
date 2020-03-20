@@ -1,6 +1,6 @@
 "use strict";
 const { DataTypes } = require("sequelize");
-const db = require("../utils/DB/db");
+const db = require("../utils/DB");
 
 const Role = db.sequelize.define("Roles", {
   id_role: {

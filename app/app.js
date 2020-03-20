@@ -16,6 +16,7 @@ require("./utils/Authentication/passport");
 const routes = require("./routes/index");
 const users = require("./routes/users.route");
 const projects = require("./routes/projects.route");
+const teams = require("./routes/teams.route");
 
 var app = express();
 
@@ -41,6 +42,7 @@ require("./models").sync();
 app.use("/", routes);
 app.use("/users", users);
 app.use("/projects", projects);
+app.use("/teams", teams);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

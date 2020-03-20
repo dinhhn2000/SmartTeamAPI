@@ -3,33 +3,29 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 
-const ProfileController = require("../controllers/projects/project.controller");
+const TeamController = require("../controllers/teams/team.controller");
 
-// MANAGE PROJECTS
+// MANAGE TEAMS
+
 router.get(
   "/list",
   passport.authenticate("jwt", { session: false }),
-  ProfileController.getProjectList
+  TeamController.getTeamList
 );
 router.get(
   "/list-members",
   passport.authenticate("jwt", { session: false }),
-  ProfileController.getProjectMemberList
+  TeamController.getTeamMemberList
 );
 router.post(
   "/create",
   passport.authenticate("jwt", { session: false }),
-  ProfileController.createProject
+  TeamController.createTeam
 );
 router.post(
   "/add-members",
   passport.authenticate("jwt", { session: false }),
-  ProfileController.addMembers
-);
-router.put(
-  "/update",
-  passport.authenticate("jwt", { session: false }),
-  ProfileController.updateProject
+  TeamController.addMembers
 );
 
 module.exports = router;
