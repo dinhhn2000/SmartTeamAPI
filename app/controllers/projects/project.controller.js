@@ -8,28 +8,27 @@ const {
 } = require("../../models");
 const helpers = require("../../utils/Helpers");
 const validator = require("../../utils/Authentication/validations");
+const { Op } = require("sequelize");
 
 module.exports = {
   getProjectList: async (req, res, next) => {
     try {
       let { user } = req;
       let projectUserRecords = await ProjectUserModel.findAll({
-        where: {
-          id_user: user.id_user
-        }
+        where: { id_user: user.id_user },
+        raw: true
       });
-      if (!projectUserRecords) throw "This project is not exist";
+      if (projectUserRecords.length === 0) throw "This project is not exist";
       let projectListIndex = projectUserRecords.map(record => {
-        return record.dataValues.id_project;
+        return record.id_project;
       });
       let projectList = [];
       for (let i = 0; i < projectListIndex.length; i++) {
         let team = await ProjectModel.findOne({
-          where: {
-            id_project: projectListIndex[i]
-          }
+          where: { id_project: projectListIndex[i] },
+          raw: true
         });
-        projectList.push(team.dataValues);
+        projectList.push(team);
       }
       return response.success(res, "Get list of projects success", projectList);
     } catch (e) {
@@ -42,9 +41,7 @@ module.exports = {
       let { user } = req;
       let { projectId } = req.body;
       let projectUserRecords = await ProjectUserModel.findAll({
-        where: {
-          id_project: projectId
-        }
+        where: { id_project: projectId }
       });
       if (projectUserRecords.length === 0) throw "This project is not exist";
       else
@@ -56,9 +53,21 @@ module.exports = {
       for (let i = 0; i < projectUserRecords.length; i++) {
         if (projectUserRecords[i].id_user === user.id_user) isInProject = true;
         let memberInfo = await UserModel.findOne({
-          where: { id_user: projectUserRecords[i].id_user }
+          attributes: {
+            exclude: [
+              "email",
+              "password",
+              "gender",
+              "dob",
+              "googleId",
+              "facebookId",
+              "is_verified"
+            ]
+          },
+          where: { id_user: projectUserRecords[i].id_user },
+          raw: true
         });
-        memberList.push(memberInfo.dataValues);
+        memberList.push(memberInfo);
       }
       if (isInProject)
         return response.success(res, "Get list of members success", memberList);
@@ -113,16 +122,15 @@ module.exports = {
       state
     } = req.body;
     try {
+      // Validation
       if (!user) throw "User not found";
       if (typeof projectId === "undefined") throw "Missing projectId field";
       if (parseInt(projectId) === NaN) throw "projectId field must be integer";
       let projectRecord = await ProjectModel.findOne({
-        where: {
-          id_project: projectId
-        }
+        where: { id_project: projectId },
+        raw: true
       });
       if (!projectRecord) throw "This project not exist";
-      else projectRecord = projectRecord.dataValues;
       if (typeof name === "undefined") name = projectRecord.name;
       if (typeof priority === "undefined") priority = projectRecord.priority;
       if (typeof state === "undefined") state = projectRecord.state;
@@ -142,16 +150,34 @@ module.exports = {
           priority: parseInt(priority),
           finishedAt
         },
-        { where: { id_project: projectId } }
+        { where: { id_project: projectId }, raw: true }
       );
-      return response.accepted(
-        res,
-        "Update project success",
-        updatedProject.dataValues
-      );
+      return response.accepted(res, "Update project success", updatedProject);
     } catch (e) {
       console.log(e);
       return response.error(res, "Update project fail", e);
+    }
+  },
+  removeProject: async (req, res, next) => {
+    try {
+      const { user } = req;
+      const { projectId } = req.body;
+      let projectRecord = await ProjectModel.findOne({
+        where: { id_project: projectId }
+      });
+      if (!projectRecord) throw "Project not exist";
+      let isAdmin = await ProjectUserModel.findOne({
+        where: { id_user: user.id_user, id_role: 2, id_project: projectId }
+      });
+      if (!isAdmin) throw "This account is not the admin in this project";
+      else {
+        await ProjectUserModel.destroy({ where: { id_project: projectId } });
+        await ProjectModel.destroy({ where: { id_project: projectId } });
+        return response.success(res, "Remove project success");
+      }
+    } catch (e) {
+      console.log(e);
+      return response.error(res, "Remove project fail", e);
     }
   },
   addMembers: async (req, res, next) => {
@@ -159,9 +185,7 @@ module.exports = {
     let { projectId, members } = req.body;
     try {
       let projectRecord = await ProjectModel.findOne({
-        where: {
-          id_project: projectId
-        }
+        where: { id_project: projectId }
       });
       if (!projectRecord) throw "Project not exist";
       else projectRecord = projectRecord.dataValues;
@@ -170,11 +194,10 @@ module.exports = {
           id_project: projectId,
           id_user: user.id_user,
           id_role: 2
-        }
+        },
+        raw: true
       });
       if (!projectUserRecord) throw "This account is not admin in this project";
-      else projectUserRecord = projectUserRecord.dataValues;
-
       for (let i = 0; i < members.length; i++) {
         let memberRecord = await TeamUserModel.findOne({
           where: {
@@ -184,13 +207,45 @@ module.exports = {
         });
         if (!memberRecord)
           throw `Member who has id=${members[i]} is not in the team`;
-        else
-          await ProjectUserModel.findOrCreate({
-            where: { id_user: members[i], id_project: projectId },
-            defaults: { id_role: 3 }
-          });
       }
+      for (let i = 0; i < members.length; i++)
+        await ProjectUserModel.findOrCreate({
+          where: { id_user: members[i], id_project: projectId },
+          defaults: { id_role: 3 }
+        });
+
       return response.created(res, "Add project's member success");
+    } catch (e) {
+      console.log(e);
+      return response.error(res, "Add project's member success", e);
+    }
+  },
+  removeMembers: async (req, res, next) => {
+    let { user } = req;
+    let { projectId, members } = req.body;
+    try {
+      let projectRecord = await ProjectModel.findOne({
+        where: { id_project: projectId },
+        raw: true
+      });
+      if (!projectRecord) throw "Project not exist";
+      let projectUserRecord = await ProjectUserModel.findOne({
+        where: {
+          id_project: projectId,
+          id_user: user.id_user,
+          id_role: 2
+        },
+        raw: true
+      });
+      if (!projectUserRecord) throw "This account is not admin in this project";
+      if (members.includes(user.id_user))
+        members.splice(members.indexOf(user.id_user), 1);
+
+      let result = await ProjectUserModel.destroy({
+        where: { id_user: { [Op.in]: members } }
+      });
+      if (result === 0) throw "Non of these members are in this project";
+      return response.accepted(res, "Remove project's member success");
     } catch (e) {
       console.log(e);
       return response.error(res, "Add project's member success", e);

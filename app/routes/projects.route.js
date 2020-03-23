@@ -21,15 +21,25 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   ProfileController.createProject
 );
+router.put(
+  "/update",
+  passport.authenticate("jwt", { session: false }),
+  ProfileController.updateProject
+);
+router.delete(
+  "/remove",
+  passport.authenticate("jwt", { session: false }),
+  ProfileController.removeProject
+);
 router.post(
   "/add-members",
   passport.authenticate("jwt", { session: false }),
   ProfileController.addMembers
 );
-router.put(
-  "/update",
+router.delete(
+  "/remove-members",
   passport.authenticate("jwt", { session: false }),
-  ProfileController.updateProject
+  ProfileController.removeMembers
 );
 
 module.exports = router;

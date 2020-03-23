@@ -1,6 +1,7 @@
 "use strict";
 const response = require("../../utils/Responses");
 const { TeamModel, TeamUserModel, UserModel } = require("../../models");
+const { Op } = require("sequelize");
 
 module.exports = {
   getTeamList: async (req, res, next) => {
@@ -98,13 +99,10 @@ module.exports = {
     try {
       if (!user) throw "User not found";
       let teamRecord = await TeamModel.findOne({
-        where: {
-          id_team: teamId
-        }
+        where: { id_team: teamId },
+        raw: true
       });
       if (!teamRecord) throw "Project not exist";
-      else teamRecord = teamRecord.dataValues;
-
       let teamUserRecords = await TeamUserModel.findOne({
         where: {
           id_user: user.id_user,
@@ -114,24 +112,52 @@ module.exports = {
       });
       if (!teamUserRecords) throw "This account is not the admin in this team";
       else teamUserRecords = teamUserRecords.dataValues;
-
       for (let i = 0; i < members.length; i++) {
         let memberRecord = await UserModel.findOne({
-          where: {
-            id_user: members[i]
-          }
+          where: { id_user: members[i] }
         });
         if (!memberRecord) throw `Member who has id=${members[i]} is not exist`;
-        else
-          await TeamUserModel.findOrCreate({
-            where: { id_user: members[i], id_team: teamId },
-            defaults: { id_role: 3 }
-          });
+      }
+      for (let i = 0; i < members.length; i++) {
+        await TeamUserModel.findOrCreate({
+          where: { id_user: members[i], id_team: teamId },
+          defaults: { id_role: 3 }
+        });
       }
       return response.created(res, "Add team's member success");
     } catch (e) {
       // console.log(e);
       return response.error(res, "Add team's member fail", e);
+    }
+  },
+  removeMembers: async (req, res, next) => {
+    let { user } = req;
+    let { teamId, members } = req.body;
+    try {
+      let teamRecord = await TeamModel.findOne({
+        where: { id_team: teamId },
+        raw: true
+      });
+      if (!teamRecord) throw "Team not exist";
+      let teamUserRecord = await TeamUserModel.findOne({
+        where: {
+          id_team: teamId,
+          id_user: user.id_user,
+          id_role: 2
+        },
+        raw: true
+      });
+      if (!teamUserRecord) throw "This account is not admin in this team";
+      if (members.includes(user.id_user))
+        members.splice(members.indexOf(user.id_user), 1);
+      let result = await TeamUserModel.destroy({
+        where: { id_user: { [Op.in]: members } }
+      });
+      if (result === 0) throw "Non of these members are in this team";
+      return response.accepted(res, "Remove project's member success");
+    } catch (e) {
+      console.log(e);
+      return response.error(res, "Add project's member success", e);
     }
   }
 };

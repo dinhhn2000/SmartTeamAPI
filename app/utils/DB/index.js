@@ -7,8 +7,9 @@ const sequelize = new Sequelize(
   constants.dbPassword,
   {
     host: constants.dbHost,
-    dialect: constants.dbDialect,
+    dialect: "postgres",
     logging: false,
+    freezeTableName: true,
     define: {
       timestamps: false
     }

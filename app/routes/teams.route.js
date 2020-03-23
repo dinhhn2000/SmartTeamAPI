@@ -27,5 +27,10 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   TeamController.addMembers
 );
+router.delete(
+  "/remove-members",
+  passport.authenticate("jwt", { session: false }),
+  TeamController.removeMembers
+);
 
 module.exports = router;
