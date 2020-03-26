@@ -3,13 +3,14 @@ const { DataTypes } = require("sequelize");
 const db = require("../utils/DB");
 
 const User = db.sequelize.define("Users", {
-  id_user: {
-    type: DataTypes.INTEGER,
+  idUser: {
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: true,
+    type: DataTypes.INTEGER,
+    allowNull: false
   },
-  first_name: { type: DataTypes.STRING, allowNull: false },
-  last_name: { type: DataTypes.STRING, allowNull: false },
+  firstName: { type: DataTypes.STRING, allowNull: false },
+  lastName: { type: DataTypes.STRING, allowNull: false },
   avatar: { type: DataTypes.STRING, allowNull: true },
   dob: { type: DataTypes.DATE, allowNull: true },
   gender: {
@@ -18,8 +19,7 @@ const User = db.sequelize.define("Users", {
     defaultValue: "Male",
     validate: {
       isIn: {
-        args: [["Male", "Female", "Not identify"]],
-        msg: "Must be English or Chinese"
+        args: [["Male", "Female", "Not identify"]]
       }
     }
   },
@@ -29,30 +29,5 @@ const User = db.sequelize.define("Users", {
   facebookId: { type: DataTypes.STRING, allowNull: true },
   is_verified: { type: DataTypes.BOOLEAN, defaultValue: false }
 });
-
-// User.sync().then(async () => {
-//   // console.log("Users table created");
-//   try {
-//     let salt = await getSalt();
-//     bcrypt.hash("admin", salt, async (error, hash) => {
-//       if (!error) {
-//         await User.findOrCreate({
-//           where: { id_user: 1 },
-//           defaults: {
-//             first_name: "admin",
-//             last_name: "admin",
-//             avatar: "",
-//             gender: "Not identify",
-//             email: "admin@gmail.com",
-//             password: hash,
-//             is_verified: true
-//           }
-//         });
-//       } else throw error;
-//     });
-//   } catch (e) {
-//     console.log(e);
-//   }
-// });
 
 module.exports = User;

@@ -5,30 +5,30 @@ const db = require("../utils/DB");
 const Team_User = db.sequelize.define(
   "Team_User",
   {
-    id_user: {
+    idUser: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       references: {
         model: "Users",
-        key: "id_user",
+        key: "idUser",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
-    id_team: {
+    idTeam: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       references: {
         model: "Teams",
-        key: "id_team",
+        key: "idTeam",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
-    id_role: {
+    idRole: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: "Roles",
-        key: "id_role",
+        key: "idRole",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     }
@@ -36,5 +36,4 @@ const Team_User = db.sequelize.define(
   { freezeTableName: true }
 );
 
-// Team_User.sync().then(async () => {});
 module.exports = Team_User;

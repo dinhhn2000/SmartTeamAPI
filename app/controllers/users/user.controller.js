@@ -4,11 +4,7 @@ const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 
 const response = require("../../utils/Responses");
-const {
-  validateEmail,
-  validatePassword,
-  validateOtpTime
-} = require("../../utils/Authentication/validations");
+const validators = require("../../utils/Validations/validations");
 const { UserModel, OtpModel } = require("../../models");
 const { bcrypt, getSalt } = require("../../utils/Encrypt");
 const { JWT_SECRET, expireTime } = require("../../utils/Constants");
@@ -17,9 +13,9 @@ const { sendEmail, createMessage } = require("../../utils/Email");
 
 function getToken(user) {
   let data = {
-    userId: user.id_user,
-    firstName: user.first_name,
-    lastName: user.last_name,
+    idUser: user.idUser,
+    firstName: user.firstName,
+    lastName: user.lastName,
     avatar: user.avatar
   };
   const token = jwt.sign(data, JWT_SECRET, {
@@ -32,23 +28,12 @@ module.exports = {
   signUp: async (req, res, next) => {
     try {
       const { email, password, firstName, lastName } = req.body;
-      if (!validateEmail(email)) {
-        throw "Email is incorrect";
-      }
-      if (!validatePassword(password)) {
-        throw "Password has to be at least 8 characters, contains at least 1 digit, 1 lower case, 1 upper case";
-      }
-      if (firstName.length === 0 || lastName.length === 0) {
-        throw "User's name is incorrect";
-      }
+      validators.validateEmail(email);
+      validators.validatePassword(password);
+      validators.validateUserName(firstName, lastName);
 
       // Check existed user
-      let existedUser = await UserModel.findAll({
-        where: {
-          email
-        }
-      });
-
+      let existedUser = await UserModel.findAll({ where: { email } });
       if (existedUser.length !== 0) {
         throw `${email} has been used`;
       } else {
@@ -56,8 +41,8 @@ module.exports = {
         bcrypt.hash(password, salt, async (error, hash) => {
           if (!error) {
             let user = await UserModel.create({
-              first_name: firstName,
-              last_name: lastName,
+              firstName,
+              lastName,
               email,
               password: hash,
               avatar: "https://icon-library.net/images/bot-icon/bot-icon-18.jpg"
@@ -65,10 +50,10 @@ module.exports = {
             // Send verify to email & create OTP
             const otp = Math.floor(Math.random() * 1000000 + 1);
             await OtpModel.create({
-              id_user: user.dataValues.id_user,
+              idUser: user.idUser,
               otp,
               type: 1,
-              email: user.dataValues.email
+              email: user.email
             });
             const message = createMessage(email, otp, "Account verification");
             sendEmail(message);
@@ -90,7 +75,9 @@ module.exports = {
       },
       async (err, user, message) => {
         if (err || !user) {
-          return response.error(res, message, err);
+          if (typeof message.message !== "undefined") message = message.message;
+          if (!err) return response.error(res, message);
+          else return response.error(res, message, err);
         }
         return response.success(res, "Sign in success", {
           expiresIn: expireTime * 60,
@@ -102,9 +89,7 @@ module.exports = {
   signInGoogle: async (req, res, next) => {
     try {
       const { access_token } = req.body;
-      if (!access_token) {
-        throw "You should provide access_token";
-      }
+      validators.validateAccessToken(access_token);
       const oauth2 = await oauth(access_token);
       oauth2.userinfo.get(async (err, oauthResponse) => {
         try {
@@ -139,10 +124,7 @@ module.exports = {
         if (err || !user) {
           return response.error(
             res,
-            err !== null
-              ? err.message
-              : "Something wrong with facebook access_token",
-            e
+            err !== null ? err.message : "Something wrong with facebook access_token"
           );
         }
         return response.success(res, "Sign in success", {
@@ -155,24 +137,25 @@ module.exports = {
   verifyAccount: async (req, res, next) => {
     const { otp, email } = req.body;
     try {
-      if (!validateEmail(email)) {
-        throw "Email is incorrect";
-      }
+      validators.validateEmail(email);
+      validators.validateOtp(otp);
       let existedOtp = await OtpModel.findOne({
         where: {
           [Op.and]: [{ otp }, { type: 1 }, { email }]
-        }
+        },
+        raw: true
       });
       if (!!existedOtp) {
-        let otpRecord = existedOtp.dataValues;
-        if (validateOtpTime(otpRecord.createdAt)) {
-          await UserModel.update(
-            { is_verified: true },
-            { where: { id_user: otpRecord.id_user } }
-          );
-          return response.success(res, "Account is verified");
-        }
-      } else throw "OTP not found";
+        validators.validateOtpTime(existedOtp.createdAt);
+        await UserModel.update(
+          { is_verified: true },
+          { where: { idUser: existedOtp.idUser } }
+        );
+        await OtpModel.destroy({
+          where: { idUser: existedOtp.idUser }
+        });
+        return response.success(res, "Account is verified");
+      } else throw "OTP is incorrect";
     } catch (e) {
       return response.error(res, "Something wrong when verify", e);
     }
@@ -187,7 +170,7 @@ module.exports = {
       else throw "User not found";
       // Send verify to email & create OTP
       const otp = Math.floor(Math.random() * 1000000 + 1);
-      await OtpModel.create({ otp, type: 1, id_user: user.id_user, email });
+      await OtpModel.create({ otp, type: 1, idUser: user.idUser, email });
       const message = createMessage(email, otp, "Reset password OTP");
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
@@ -207,7 +190,7 @@ module.exports = {
 
       // Send verify to email & create OTP
       const otp = Math.floor(Math.random() * 1000000 + 1);
-      await OtpModel.create({ id_user: user.id_user, otp, type: 2 });
+      await OtpModel.create({ idUser: user.idUser, otp, type: 2 });
       const message = createMessage(email, otp, "Reset password OTP");
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
@@ -219,31 +202,31 @@ module.exports = {
   verifyChangePassword: async (req, res, next) => {
     try {
       const { otp, password, email } = req.body;
-      let user = await UserModel.findOne({
-        where: { email }
-      });
-      if (!!user) user = user.dataValues;
-      else throw "User not found";
+      let user = await UserModel.findOne({ where: { email }, raw: true });
+      if (!!user) user = user;
+      else throw "Email not found";
+      validators.validateEmail(email);
+      validators.validatePassword(password);
+      validators.validateOtp(otp);
 
       let existedOtp = await OtpModel.findOne({
         where: {
-          [Op.and]: [{ otp }, { type: 2 }, { id_user: user.id_user }]
-        }
+          [Op.and]: [{ otp }, { type: 2 }, { idUser: user.idUser }]
+        },
+        raw: true
       });
       if (existedOtp) {
-        let otpRecord = existedOtp.dataValues;
-        if (validateOtpTime(otpRecord.createdAt)) {
-          let salt = await getSalt();
-          bcrypt.hash(password, salt, async (error, hash) => {
-            if (!error) {
-              await UserModel.update(
-                { password: hash },
-                { where: { id_user: user.id_user } }
-              );
-              return response.success(res, "Change password complete");
-            }
-          });
-        }
+        validators.validateOtpTime(existedOtp.createdAt);
+        let salt = await getSalt();
+        bcrypt.hash(password, salt, async (error, hash) => {
+          if (!error) {
+            await UserModel.update(
+              { password: hash },
+              { where: { idUser: user.idUser } }
+            );
+            return response.success(res, "Change password complete");
+          }
+        });
       }
     } catch (e) {
       return response.error(res, "Something wrong when verify", e);

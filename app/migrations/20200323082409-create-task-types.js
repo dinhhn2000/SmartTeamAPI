@@ -1,32 +1,33 @@
 "use strict";
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("Teams", {
-      idTeam: {
+    return queryInterface.createTable("Task-Types", {
+      idType: {
+        allowNull: false,
+        autoIncrement: true,
+        primaryKey: true,
+        type: Sequelize.INTEGER
+      },
+      idProject: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
       name: {
-        allowNull: false,
         type: Sequelize.STRING
       },
-      avatar: {
-        allowNull: true,
-        type: Sequelize.STRING
-      },
-      creator: {
+      createdAt: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.DATE
       },
-      priority: {
+      updatedAt: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.DATE
       }
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("Teams");
+    return queryInterface.dropTable("Task-Types");
   }
 };

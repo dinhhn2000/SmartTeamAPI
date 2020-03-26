@@ -10,11 +10,7 @@ const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
 const { UserModel } = require("../../models");
-const {
-  JWT_SECRET,
-  facebookClientId,
-  facebookClientSecret
-} = require("../Constants");
+const { JWT_SECRET, facebookClientId, facebookClientSecret } = require("../Constants");
 
 passport.serializeUser((user, done) => {
   done(null, user);
@@ -31,7 +27,7 @@ const jwt = new JWTStrategy(
   async (jwtPayload, cb) => {
     try {
       let existedUser = await UserModel.findOne({
-        where: { id_user: jwtPayload.userId }
+        where: { idUser: jwtPayload.idUser }
       });
       if (existedUser.length !== 0) {
         return cb(null, existedUser.dataValues);
@@ -59,8 +55,7 @@ const local = new LocalStrategy(
       });
       if (existedUser.length > 0) {
         let user = existedUser[0].dataValues;
-        if (user.is_verified === false)
-          return cb(null, false, "User is not verified.");
+        if (user.is_verified === false) return cb(null, false, "User is not verified.");
         bcrypt.compare(password, user.password, (err, res) => {
           if (res) {
             // console.log(user);
@@ -69,7 +64,7 @@ const local = new LocalStrategy(
         });
       } else return cb(null, false, "Incorrect email or password.");
     } catch (e) {
-      return cb(e);
+      return cb(e.message);
     }
   }
 );
@@ -93,8 +88,8 @@ const facebook = new facebookStrategy(
         return cb(null, user);
       } else {
         let newUser = await UserModel.create({
-          first_name: profile.name.givenName,
-          last_name: profile.name.familyName,
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName,
           facebookId: profile.id,
           avatar: profile.photos[0].value,
           is_verified: true

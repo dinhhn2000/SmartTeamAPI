@@ -5,30 +5,30 @@ const db = require("../utils/DB");
 const Project_User = db.sequelize.define(
   "Project_User",
   {
-    id_user: {
+    idUser: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       references: {
         model: "Users",
-        key: "id_user",
+        key: "idUser",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
-    id_project: {
+    idProject: {
       type: DataTypes.INTEGER,
       primaryKey: true,
       references: {
         model: "Projects",
-        key: "id_project",
+        key: "idProject",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
-    id_role: {
+    idRole: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: "Roles",
-        key: "id_role",
+        key: "idRole",
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     }
@@ -36,5 +36,4 @@ const Project_User = db.sequelize.define(
   { freezeTableName: true }
 );
 
-// Project_User.sync().then(async () => {});
 module.exports = Project_User;

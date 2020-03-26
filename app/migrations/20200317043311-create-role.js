@@ -3,7 +3,7 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface
       .createTable("Roles", {
-        id_role: {
+        idRole: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
@@ -13,15 +13,15 @@ module.exports = {
       .then(() => {
         queryInterface.bulkInsert("Roles", [
           {
-            id_role: 1,
+            idRole: 1,
             name: "Super admin"
           },
           {
-            id_role: 2,
+            idRole: 2,
             name: "Admin"
           },
           {
-            id_role: 3,
+            idRole: 3,
             name: "Member"
           }
         ]);

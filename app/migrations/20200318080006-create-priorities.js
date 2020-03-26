@@ -2,7 +2,7 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable("Priorities", {
-      id_priority: {
+      idPriority: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,

@@ -3,43 +3,43 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 
-const ProjectController = require("../controllers/projects/project.controller");
+const TaskController = require("../controllers/tasks/task.controller");
 
-// MANAGE PROJECTS
+// MANAGE TASKS
 router.get(
   "/list",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.getProjectList
+  TaskController.getTaskList
 );
 router.get(
   "/list-members",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.getProjectMemberList
+  TaskController.getTaskMemberList
 );
 router.post(
   "/create",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.createProject
+  TaskController.createTask
 );
 router.put(
   "/update",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.updateProject
+  TaskController.updateTask
 );
 router.delete(
   "/remove",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.removeProject
+  TaskController.removeTask
 );
 router.post(
   "/add-members",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.addMembers
+  TaskController.addMembers
 );
 router.delete(
   "/remove-members",
   passport.authenticate("jwt", { session: false }),
-  ProjectController.removeMembers
+  TaskController.removeMembers
 );
 
 module.exports = router;

@@ -10,9 +10,9 @@ const sequelize = new Sequelize(
     dialect: "postgres",
     logging: false,
     freezeTableName: true,
-    define: {
-      timestamps: false
-    }
+    // define: {
+    //   timestamps: true
+    // }
   }
 );
 var db = {};

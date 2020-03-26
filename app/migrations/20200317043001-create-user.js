@@ -5,13 +5,13 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface
       .createTable("Users", {
-        id_user: {
+        idUser: {
           type: Sequelize.INTEGER,
           primaryKey: true,
           autoIncrement: true
         },
-        first_name: { type: Sequelize.STRING, allowNull: false },
-        last_name: { type: Sequelize.STRING, allowNull: false },
+        firstName: { type: Sequelize.STRING, allowNull: false },
+        lastName: { type: Sequelize.STRING, allowNull: false },
         avatar: { type: Sequelize.STRING, allowNull: true },
         dob: { type: Sequelize.DATE, allowNull: true },
         gender: {
@@ -37,9 +37,9 @@ module.exports = {
           bcrypt.hash("admin", salt, async (error, hash) => {
             queryInterface.bulkInsert("Users", [
               {
-                id_user: 1,
-                first_name: "admin",
-                last_name: "admin",
+                idUser: 1,
+                firstName: "admin",
+                lastName: "admin",
                 avatar: "",
                 gender: "Not identify",
                 email: "admin@gmail.com",

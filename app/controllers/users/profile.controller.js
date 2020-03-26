@@ -3,20 +3,16 @@ const jwt = require("jsonwebtoken");
 const response = require("../../utils/Responses");
 const cloudinary = require("cloudinary").v2;
 
-const {
-  validateEmail,
-  validateString,
-  convertDateToDATE,
-  validateGender
-} = require("../../utils/Authentication/validations");
+const validators = require("../../utils/Validations/validations");
+const helpers = require("../../utils/Helpers/index");
 const { UserModel } = require("../../models");
 const { JWT_SECRET, expireTime } = require("../../utils/Constants");
 
 function getToken(user) {
   let data = {
-    userId: user.id_user,
-    firstName: user.first_name,
-    lastName: user.last_name,
+    idUser: user.idUser,
+    firstName: user.firstName,
+    lastName: user.lastName,
     avatar: user.avatar
   };
 
@@ -29,41 +25,36 @@ function getToken(user) {
 
 module.exports = {
   getProfile: async (req, res, next) => {
-    let { user } = req;
-    if (!user) {
-      return response.error(res, req.message);
+    try {
+      let { user } = req;
+      if (!user) {
+        return response.error(res, req.message);
+      }
+      let { firstName, lastName, avatar, email, gender, dob } = user;
+      let profile = { firstName, lastName, avatar, email, gender, dob };
+      return response.success(res, "Get profile success", profile);
+    } catch (e) {
+      console.log(e);
+      return response.error(res, "Cannot get profile", e);
     }
-    let profile = {
-      firstName: user.first_name,
-      lastName: user.last_name,
-      avatar: user.avatar,
-      email: user.email,
-      gender: user.gender,
-      dob: user.dob
-    };
-    return response.success(res, "Get profile success", profile);
   },
   updateProfile: async (req, res, next) => {
     try {
       let { user } = req;
       let { firstName, lastName, dob, gender, email } = req.body;
-      [firstName, lastName, gender, email] = validateString(
-        [firstName, lastName, gender, email],
-        ["firstName", "lastName", "gender", "email"]
-      );
-      if (!validateEmail(email) && email !== null)
-        throw `email is not in correct format`;
-      dob = dob === undefined ? null : convertDateToDATE(dob, "dob");
-      validateGender(gender);
+      validators.validateProfileInfo(req.body);
+      validators.validateEmail(email);
+      if (typeof dob !== "undefined") helpers.convertDateToDATE(dob, "dob");
+      validators.validateGender(gender);
 
       await UserModel.update(
         {
-          first_name: firstName === null ? user.first_name : firstName,
-          last_name: lastName === null ? user.last_name : lastName,
+          firstName: firstName === null ? user.firstName : firstName,
+          lastName: lastName === null ? user.lastName : lastName,
           dob: dob === null ? user.dob : dob,
           gender: gender === null ? user.gender : gender
         },
-        { where: { id_user: user.id_user } }
+        { where: { idUser: user.idUser } }
       );
 
       return response.success(res, "Update profile success");
@@ -75,14 +66,10 @@ module.exports = {
   updateAvatar: async (req, res, next) => {
     try {
       const { user } = req;
-
       let uploadResult = await cloudinary.uploader.upload(req.file.path);
-
       await UserModel.update(
-        {
-          avatar: uploadResult.url
-        },
-        { where: { id_user: user.id_user } }
+        { avatar: uploadResult.url },
+        { where: { idUser: user.idUser } }
       );
 
       return response.success(res, "Update avatar success", uploadResult.url);
@@ -93,18 +80,18 @@ module.exports = {
   }
   // setRole: async (req, res, next) => {
   //   const { user } = req;
-  //   const { userId, roleId } = req.body;
+  //   const { idUser, idRole } = req.body;
   //   try {
   //     let userRoleRecord = await UserRoleModel.findOne({
-  //       where: { id_user: user.id_user }
+  //       where: { idUser: user.idUser }
   //     });
   //     userRoleRecord = !!userRoleRecord ? userRoleRecord.dataValues : null;
   //     if (userRoleRecord === null) throw "Your account do not have role";
-  //     if (!userId || !roleId) throw "Missing userId or roleId";
-  //     if (userRoleRecord.id_role <= roleId) {
+  //     if (!idUser || !idRole) throw "Missing idUser or idRole";
+  //     if (userRoleRecord.idRole <= idRole) {
   //       const upsertResult = await UserRoleModel.upsert(
-  //         { id_user: userId, id_role: roleId },
-  //         { id_role: roleId, id_user: userId }
+  //         { idUser: idUser, idRole: idRole },
+  //         { idRole: idRole, idUser: idUser }
   //       );
   //       if (upsertResult) {
   //         return response.accepted(res, "Set role success");

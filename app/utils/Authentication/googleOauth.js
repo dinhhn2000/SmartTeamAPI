@@ -30,8 +30,8 @@ module.exports = {
         return existedUser[0].dataValues;
       } else {
         let newUser = UserModel.create({
-          first_name: user.given_name,
-          last_name: user.family_name,
+          firstName: user.given_name,
+          lastName: user.family_name,
           googleId: user.id,
           avatar: user.picture,
           is_verified: true
