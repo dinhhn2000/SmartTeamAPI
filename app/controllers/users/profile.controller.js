@@ -34,38 +34,33 @@ module.exports = {
       let profile = { firstName, lastName, avatar, email, gender, dob };
       return response.success(res, "Get profile success", profile);
     } catch (e) {
-      console.log(e);
+      
       return response.error(res, "Cannot get profile", e);
     }
   },
   updateProfile: async (req, res, next) => {
     try {
       let { user } = req;
-      let { firstName, lastName, dob, gender, email } = req.body;
+      let { dob } = req.body;
+      console.log(req.body);
+      
       validators.validateProfileInfo(req.body);
-      validators.validateEmail(email);
-      if (typeof dob !== "undefined") helpers.convertDateToDATE(dob, "dob");
-      validators.validateGender(gender);
+      if (typeof dob !== "undefined")
+        req.body.dob = helpers.convertDateToDATE(dob, "dob");
 
-      await UserModel.update(
-        {
-          firstName: firstName === null ? user.firstName : firstName,
-          lastName: lastName === null ? user.lastName : lastName,
-          dob: dob === null ? user.dob : dob,
-          gender: gender === null ? user.gender : gender
-        },
-        { where: { idUser: user.idUser } }
-      );
+      await UserModel.update(req.body, { where: { idUser: user.idUser } });
 
       return response.success(res, "Update profile success");
     } catch (e) {
-      console.log(e);
+      
       return response.error(res, "Something wrong when update profile", e);
     }
   },
   updateAvatar: async (req, res, next) => {
     try {
       const { user } = req;
+      console.log(req.file.path);
+      
       let uploadResult = await cloudinary.uploader.upload(req.file.path);
       await UserModel.update(
         { avatar: uploadResult.url },
@@ -74,7 +69,7 @@ module.exports = {
 
       return response.success(res, "Update avatar success", uploadResult.url);
     } catch (e) {
-      // console.log(e);
+      
       return response.error(res, "Something wrong when update avatar", e);
     }
   }
@@ -98,7 +93,7 @@ module.exports = {
   //       } else throw "Upsert role failed";
   //     } else throw "Cannot set higher role than yours for this user";
   //   } catch (e) {
-  //     console.log(e);
+  //     
   //     return response.error(res, "Cannot set role", e);
   //   }
   // }

@@ -12,18 +12,9 @@ module.exports = {
       })
       .then(() => {
         queryInterface.bulkInsert("Roles", [
-          {
-            idRole: 1,
-            name: "Super admin"
-          },
-          {
-            idRole: 2,
-            name: "Admin"
-          },
-          {
-            idRole: 3,
-            name: "Member"
-          }
+          { idRole: 1, name: "Super admin" },
+          { idRole: 2, name: "Admin" },
+          { idRole: 3, name: "Member" }
         ]);
       });
   },

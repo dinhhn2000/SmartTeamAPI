@@ -7,9 +7,17 @@ function firstError(errorObj) {
   return errorObj[Object.keys(errorObj)[0]];
 }
 
+Validator.register(
+  "intervalFormat",
+  function(value, requirement, attribute) {
+    return value.match(/^(2[0-3]|[01]?[0-9]):([0-5]?[0-9]):([0-5]?[0-9])$/);
+  },
+  "The :attribute has to be in format hh:mm:ss"
+);
+
 module.exports = {
   validateEmail: email => {
-    let validation = new Validator({ email }, { email: rules.email });
+    let validation = new Validator({ email }, { email: rules.required.email });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
@@ -22,7 +30,7 @@ module.exports = {
   validateAccessToken: access_token => {
     let validation = new Validator(
       { access_token },
-      { access_token: rules.access_token }
+      { access_token: rules.required.access_token }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
@@ -30,26 +38,27 @@ module.exports = {
   validateUserName: (firstName, lastName) => {
     let validation = new Validator(
       { firstName, lastName },
-      { firstName: rules.firstName, lastName: rules.lastName }
+      { firstName: rules.required.firstName, lastName: rules.required.lastName }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateProfileInfo: ({ firstName, lastName, gender, email }) => {
+  validateProfileInfo: ({ firstName, lastName, gender, email, dob }) => {
     let validation = new Validator(
-      { firstName, lastName, gender, email },
+      { firstName, lastName, gender, email, dob },
       {
-        firstName: rules.firstName,
-        lastName: rules.lastName,
-        gender: rules.gender,
-        email: rules.email
+        firstName: rules.required.firstName,
+        lastName: rules.required.lastName,
+        gender: rules.non_required.gender,
+        email: rules.non_required.email,
+        dob: rules.non_required.dob
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
   validateOtp: otp => {
-    let validation = new Validator({ otp }, { otp: rules.otp });
+    let validation = new Validator({ otp }, { otp: rules.required.otp });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
@@ -62,49 +71,122 @@ module.exports = {
   },
 
   validateGender: gender => {
-    let validation = new Validator({ gender }, { gender: rules.gender });
+    let validation = new Validator({ gender }, { gender: rules.required.gender });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateProjectInfo: ({ name, priority, idTeam, finishedAt }) => {
+  validateProjectInfo: ({ name, priority, idTeam, finishedAt, description }) => {
     let validation = new Validator(
-      { name, priority, idTeam, finishedAt },
+      { name, priority, idTeam, finishedAt, description },
       {
-        name: rules.name,
-        priority: rules.priority,
-        idTeam: rules.idTeam,
-        finishedAt: rules.finishedAt
+        name: rules.required.name,
+        description: rules.non_required.description,
+        priority: rules.required.priority,
+        idTeam: rules.required.idTeam,
+        finishedAt: rules.required.finishedAt
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateHhMm: inputField => {
-    var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(
-      inputField.value
+  validateUpdateProjectInfo: projectInfo => {
+    let { idProject, name, description, priority, finishedAt, state } = projectInfo;
+    let validation = new Validator(
+      { idProject, name, description, priority, finishedAt, state },
+      {
+        name: rules.non_required.name,
+        description: rules.non_required.description,
+        priority: rules.non_required.priority,
+        state: rules.non_required.state,
+        finishedAt: rules.non_required.finishedAt,
+        idProject: rules.required.idProject
+      }
     );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
+  validateHhMm: input => {
+    var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(input);
     return isValid;
   },
 
-  validateTaskInfo: taskInfo => {
-    let { name, points, finishedAt, type, duration, idProject } = taskInfo;
+  validateTaskInfo: ({
+    idProject,
+    name,
+    points,
+    startedAt,
+    finishedAt,
+    type,
+    duration
+  }) => {
     let validation = new Validator(
-      { name, points, finishedAt, type, duration, idProject },
+      { name, points, startedAt, finishedAt, type, duration, idProject },
       {
-        name: rules.name,
-        points: rules.points,
-        finishedAt: rules.finishedAt,
-        type: rules.type,
-        duration: rules.duration,
-        idProject: rules.idProject
+        name: rules.required.name,
+        description: rules.non_required.description,
+        points: rules.required.points,
+        startedAt: rules.non_required.startedAt,
+        finishedAt: rules.non_required.finishedAt,
+        type: rules.required.type,
+        duration: "required|intervalFormat",
+        idProject: rules.required.idProject
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
-    if (!validateHhMm(duration)) throw "duration field must have HH:MM format";
+  },
+
+  validateUpdateTaskInfo: ({
+    idTask,
+    name,
+    description,
+    points,
+    startedAt,
+    finishedAt,
+    type,
+    duration
+  }) => {
+    let validation = new Validator(
+      { idTask, name, points, startedAt, finishedAt, type, duration, description },
+      {
+        idTask: rules.required.idTask,
+        name: rules.non_required.name,
+        description: rules.non_required.description,
+        points: rules.non_required.points,
+        startedAt: rules.non_required.startedAt,
+        finishedAt: rules.non_required.finishedAt,
+        type: rules.non_required.type,
+        duration: "intervalFormat"
+      }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
   isInFuture: (date, fieldName) => {
     if (new Date(date) <= new Date()) throw `${fieldName} field is happened before now`;
-    return true;
+    // return true;
+  },
+
+  validateTeamMembers: (idTeam, members) => {
+    let validation = new Validator(
+      { idTeam, members },
+      { idTeam: rules.required.idTeam, members: rules.required.members }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
+  validateProjectMembers: (idProject, members) => {
+    let validation = new Validator(
+      { idProject, members },
+      { idProject: rules.required.idProject, members: rules.required.members }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
+  validateTaskMembers: (idTask, members) => {
+    let validation = new Validator(
+      { idTask, members },
+      { idTask: rules.required.idTask, members: rules.required.members }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
   }
 };

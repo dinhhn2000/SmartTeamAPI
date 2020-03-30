@@ -40,12 +40,20 @@ module.exports = {
       });
   },
   error: (response, message, error) => {
+    console.log(error);
     if (typeof error !== "undefined")
-      return response.status(400).json({
-        message,
-        result: "FAIL",
-        error
-      });
+      if (typeof error.message === "undefined")
+        return response.status(400).json({
+          message,
+          result: "FAIL",
+          error
+        });
+      else
+        return response.status(400).json({
+          message,
+          result: "FAIL",
+          error: error.message
+        });
     else
       return response.status(400).json({
         message,

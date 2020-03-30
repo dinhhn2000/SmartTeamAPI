@@ -12,11 +12,11 @@ module.exports = {
         let newProject = await models.ProjectModel.create(
           {
             name,
-            short_name: helpers.shortenNameHelper(name),
-            creator: parseInt(idTeam),
+            short_name: helpers.shortenName(name),
+            idTeam: idTeam,
             description,
             state: 2,
-            priority: parseInt(priority),
+            priority,
             finishedAt
           },
           { transaction: t }
@@ -32,9 +32,10 @@ module.exports = {
         await t.commit();
         return newProject;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   },
@@ -42,29 +43,29 @@ module.exports = {
     return db.sequelize.transaction().then(async t => {
       try {
         let projectRecord = await models.ProjectModel.findOne({
-          where: { idProject: idProject }
+          where: { idProject }
         });
         if (!projectRecord) throw "Project not exist";
         let isAdmin = await models.ProjectUserModel.findOne({
-          where: { idUser, idRole: 2, idProject: idProject }
+          where: { idUser, idRole: 2, idProject }
         });
         if (!isAdmin) throw "This account is not the admin in this project";
 
         await models.ProjectUserModel.destroy({
-          where: { idProject: idProject },
+          where: { idProject },
           transaction: t
         });
         await models.ProjectModel.destroy({
-          where: { idProject: idProject },
+          where: { idProject },
           transaction: t
         });
         await t.commit();
         return true;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        if (e.message === undefined) throw e;
-        else throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   },
@@ -72,19 +73,20 @@ module.exports = {
     return db.sequelize.transaction().then(async t => {
       try {
         let projectRecord = await models.ProjectModel.findOne({
-          where: { idProject: idProject },
+          where: { idProject },
           raw: true
         });
         if (!projectRecord) throw "Project not exist";
 
         let adminRecord = await models.ProjectUserModel.findOne({
-          where: { idProject: idProject, idUser, idRole: 2 },
+          where: { idProject, idUser, idRole: 2 },
           raw: true
         });
         if (!adminRecord) throw "This account is not admin in this project";
 
+        // Check if any member already in project
         let projectUserRecords = await models.ProjectUserModel.findAll({
-          where: { idProject: idProject, idUser: { [Op.in]: members } },
+          where: { idProject, idUser: { [Op.in]: members } },
           raw: true
         });
         if (projectUserRecords.length > 0)
@@ -92,24 +94,24 @@ module.exports = {
 
         // Check if all members are in the team
         let memberRecord = await models.TeamUserModel.findAll({
-          where: { idUser: { [Op.in]: members }, idTeam: projectRecord.creator }
+          where: { idUser: { [Op.in]: members }, idTeam: projectRecord.idTeam }
         });
-        if (memberRecord.length !== members.length)
+        if (memberRecord.length < members.length)
           throw `Some of the members are not in the team`;
 
         // Add member
         let data = members.map(member => {
-          return { idUser: member, idProject: idProject, idRole: 3 };
+          return { idUser: member, idProject, idRole: 3 };
         });
         await models.ProjectUserModel.bulkCreate(data, { transaction: t });
 
         await t.commit();
         return true;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        if (e.message === undefined) throw e;
-        else throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   },
@@ -117,17 +119,17 @@ module.exports = {
     return db.sequelize.transaction().then(async t => {
       try {
         let projectRecord = await models.ProjectModel.findOne({
-          where: { idProject: idProject },
+          where: { idProject },
           raw: true
         });
         if (!projectRecord) throw "Project not exist";
         let projectUserRecord = await models.ProjectUserModel.findOne({
-          where: { idProject: idProject, idUser, idRole: 2 },
+          where: { idProject, idUser, idRole: 2 },
           raw: true
         });
         if (!projectUserRecord) throw "This account is not admin in this project";
-        if (members.includes(idUser)) members.splice(members.indexOf(idUser), 1);
 
+        if (members.includes(idUser)) members.splice(members.indexOf(idUser), 1);
         let result = await models.ProjectUserModel.destroy({
           where: { idUser: { [Op.in]: members } }
         });
@@ -136,10 +138,10 @@ module.exports = {
         await t.commit();
         return true;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        if (e.message === undefined) throw e;
-        else throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   }

@@ -63,7 +63,7 @@ module.exports = {
         });
       }
     } catch (e) {
-      console.log(e);
+      
       return response.error(res, "Sign up failed", e);
     }
   },
@@ -124,7 +124,7 @@ module.exports = {
         if (err || !user) {
           return response.error(
             res,
-            err !== null ? err.message : "Something wrong with facebook access_token"
+            err !== null ? err.message : "Required access_token"
           );
         }
         return response.success(res, "Sign in success", {
@@ -139,6 +139,7 @@ module.exports = {
     try {
       validators.validateEmail(email);
       validators.validateOtp(otp);
+      
       let existedOtp = await OtpModel.findOne({
         where: {
           [Op.and]: [{ otp }, { type: 1 }, { email }]
@@ -163,6 +164,8 @@ module.exports = {
   verifyAccountResend: async (req, res, next) => {
     try {
       const { email } = req.body;
+      validators.validateEmail(email);
+
       let user = await UserModel.findOne({
         where: { email }
       });
@@ -175,13 +178,15 @@ module.exports = {
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
     } catch (e) {
-      console.log(e);
+      
       return response.error(res, "Something wrong when create otp", e);
     }
   },
   changePassword: async (req, res, next) => {
     try {
       const { email } = req.body;
+      validators.validateEmail(email);
+
       let user = await UserModel.findOne({
         where: { email }
       });
@@ -195,19 +200,20 @@ module.exports = {
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
     } catch (e) {
-      console.log(e);
+      
       return response.error(res, "Something wrong when create otp", e);
     }
   },
   verifyChangePassword: async (req, res, next) => {
     try {
       const { otp, password, email } = req.body;
-      let user = await UserModel.findOne({ where: { email }, raw: true });
-      if (!!user) user = user;
-      else throw "Email not found";
       validators.validateEmail(email);
       validators.validatePassword(password);
       validators.validateOtp(otp);
+
+      let user = await UserModel.findOne({ where: { email }, raw: true });
+      if (!!user) user = user;
+      else throw "Email not found";
 
       let existedOtp = await OtpModel.findOne({
         where: {
@@ -215,7 +221,7 @@ module.exports = {
         },
         raw: true
       });
-      if (existedOtp) {
+      if (!!existedOtp) {
         validators.validateOtpTime(existedOtp.createdAt);
         let salt = await getSalt();
         bcrypt.hash(password, salt, async (error, hash) => {
@@ -224,10 +230,13 @@ module.exports = {
               { password: hash },
               { where: { idUser: user.idUser } }
             );
+            await OtpModel.destroy({
+              where: { idUser: existedOtp.idUser }
+            });
             return response.success(res, "Change password complete");
           }
         });
-      }
+      } else throw "OTP is incorrect";
     } catch (e) {
       return response.error(res, "Something wrong when verify", e);
     }

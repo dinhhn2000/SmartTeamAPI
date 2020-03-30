@@ -37,7 +37,7 @@ module.exports = {
             } else throw error;
           });
         } catch (e) {
-          console.log(e);
+          
         }
       });
       await RoleModel.sync().then(async () => {
@@ -55,7 +55,7 @@ module.exports = {
             defaults: { name: "Member" }
           });
         } catch (e) {
-          console.log(e);
+          
         }
         // console.log("Roles table created");
       });
@@ -83,7 +83,7 @@ module.exports = {
             defaults: { name: "Closed completed" }
           });
         } catch (e) {
-          console.log(e);
+          
         }
         // console.log("States table created");
       });
@@ -106,7 +106,7 @@ module.exports = {
             defaults: { name: "Critical" }
           });
         } catch (e) {
-          console.log(e);
+          
         }
         // console.log("Prioritys table created");
       });
@@ -129,13 +129,14 @@ module.exports = {
             defaults: { name: "Deployed" }
           });
         } catch (e) {
-          console.log(e);
+          
         }
       });
       await TaskModel.sync();
       await TaskUserModel.sync();
+      await createUserData();
     } catch (e) {
-      console.log(e);
+      
     }
   },
   OtpModel,
@@ -147,6 +148,9 @@ module.exports = {
   TeamUserModel,
   TeamModel,
   UserModel,
+  TaskModel,
+  TaskTypeModel,
+  TaskUserModel,
   excludeFieldsForUserInfo: [
     "email",
     "password",
@@ -155,5 +159,31 @@ module.exports = {
     "googleId",
     "facebookId",
     "is_verified"
-  ],
+  ]
+};
+
+const createUserData = async () => {
+  // console.log("Users table created");
+  try {
+    let salt = await getSalt();
+    bcrypt.hash("123456Aa", salt, async (error, hash) => {
+      if (!error) {
+        for (let i = 2; i < 6; i++) {
+          let admin = await UserModel.findOne({ where: { idUser: i } });
+          if (!admin)
+            await UserModel.create({
+              firstName: `admin${i}`,
+              lastName: `admin${i}`,
+              avatar: null,
+              gender: "Not identify",
+              email: `admin${i}@gmail.com`,
+              password: hash,
+              is_verified: true
+            });
+        }
+      } else throw error;
+    });
+  } catch (e) {
+    
+  }
 };

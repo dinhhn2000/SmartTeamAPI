@@ -17,6 +17,7 @@ const routes = require("./routes/index");
 const users = require("./routes/users.route");
 const projects = require("./routes/projects.route");
 const teams = require("./routes/teams.route");
+const tasks = require("./routes/tasks.route");
 
 var app = express();
 
@@ -36,13 +37,14 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 
-// Sync a model
+// Sync all models
 require("./models").sync();
 
 app.use("/", routes);
 app.use("/users", users);
 app.use("/projects", projects);
 app.use("/teams", teams);
+app.use("/tasks", tasks);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

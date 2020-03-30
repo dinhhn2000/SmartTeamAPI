@@ -1,6 +1,9 @@
 "use strict";
 const { DataTypes, Deferrable } = require("sequelize");
+const withInterval = require("sequelize-interval-postgres");
 const db = require("../utils/DB");
+
+const intervalDataTypes = withInterval(DataTypes);
 
 const Task = db.sequelize.define("Tasks", {
   idTask: {
@@ -25,6 +28,10 @@ const Task = db.sequelize.define("Tasks", {
   description: {
     type: DataTypes.STRING
   },
+  startedAt: {
+    allowNull: true,
+    type: DataTypes.DATE
+  },
   finishedAt: {
     allowNull: true,
     type: DataTypes.DATE
@@ -44,7 +51,7 @@ const Task = db.sequelize.define("Tasks", {
   },
   duration: {
     allowNull: false,
-    type: DataTypes.TIME
+    type: intervalDataTypes.INTERVAL
   }
 });
 

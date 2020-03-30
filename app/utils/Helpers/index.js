@@ -1,7 +1,5 @@
-const moment = require("moment");
-
 module.exports = {
-  shortenNameHelper: name => {
+  shortenName: name => {
     return require("./shortName.helper").shortenName(name);
   },
 

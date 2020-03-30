@@ -29,7 +29,7 @@ exports.sendEmail = async message => {
   try {
     await transporter.sendMail(message);
   } catch (e) {
-    console.log(e);
+    
     throw e;
   }
 };

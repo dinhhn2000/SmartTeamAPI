@@ -29,7 +29,8 @@ module.exports = {
         password: { type: Sequelize.STRING, allowNull: true },
         googleId: { type: Sequelize.STRING, allowNull: true },
         facebookId: { type: Sequelize.STRING, allowNull: true },
-        is_verified: { type: Sequelize.BOOLEAN, defaultValue: false }
+        is_verified: { type: Sequelize.BOOLEAN, defaultValue: false },
+        updatedAt: { allowNull: false, type: Sequelize.DATE }
       })
       .then(async () => {
         try {
@@ -48,9 +49,7 @@ module.exports = {
               }
             ]);
           });
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
       })
       .then(() => {
         // perform further operations if needed

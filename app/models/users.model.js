@@ -19,7 +19,8 @@ const User = db.sequelize.define("Users", {
     defaultValue: "Male",
     validate: {
       isIn: {
-        args: [["Male", "Female", "Not identify"]]
+        args: [["Male", "Female", "Not identify"]],
+        msg: "Must be Male or Female or Not identify"
       }
     }
   },

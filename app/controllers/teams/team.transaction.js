@@ -26,9 +26,11 @@ module.exports = {
         await t.commit();
         return newTeam;
       } catch (e) {
-        console.log(e);
+        console.log(e.errors);
         if (t) await t.rollback();
-        throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   },
@@ -53,14 +55,14 @@ module.exports = {
           where: { idTeam: idTeam },
           transaction: t
         });
-        
+
         await t.commit();
         return true;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        if (e.message === undefined) throw e;
-        else throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   },
@@ -89,7 +91,7 @@ module.exports = {
         let memberRecord = await models.UserModel.findAll({
           where: { idUser: { [Op.in]: members } }
         });
-        if (memberRecord.length !== members.length)
+        if (memberRecord.length < members.length)
           throw `Some of the members are not existed`;
 
         let data = members.map(member => {
@@ -100,10 +102,10 @@ module.exports = {
         await t.commit();
         return true;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        if (e.message === undefined) throw e;
-        else throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   },
@@ -131,10 +133,10 @@ module.exports = {
         await t.commit();
         return true;
       } catch (e) {
-        console.log(e);
         if (t) await t.rollback();
-        if (e.message === undefined) throw e;
-        else throw e.message;
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
       }
     });
   }

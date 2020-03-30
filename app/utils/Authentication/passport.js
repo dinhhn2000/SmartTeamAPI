@@ -35,7 +35,7 @@ const jwt = new JWTStrategy(
         return cb(null, false, { message: "Not found user" });
       }
     } catch (e) {
-      console.log(e);
+      
       return cb(e);
     }
   }
@@ -48,13 +48,9 @@ const local = new LocalStrategy(
   },
   async (email, password, cb) => {
     try {
-      let existedUser = await UserModel.findAll({
-        where: {
-          email
-        }
-      });
-      if (existedUser.length > 0) {
-        let user = existedUser[0].dataValues;
+      let existedUser = await UserModel.findOne({ where: { email }, raw: true });
+      if (!!existedUser) {
+        let user = existedUser;
         if (user.is_verified === false) return cb(null, false, "User is not verified.");
         bcrypt.compare(password, user.password, (err, res) => {
           if (res) {
@@ -78,11 +74,7 @@ const facebook = new facebookStrategy(
   async (accessToken, refreshToken, profile, cb) => {
     // Check existed user
     try {
-      let existedUser = await UserModel.findAll({
-        where: {
-          facebookId: profile.id
-        }
-      });
+      let existedUser = await UserModel.findAll({ where: { facebookId: profile.id } });
       if (existedUser.length > 0) {
         let user = existedUser[0].dataValues;
         return cb(null, user);
