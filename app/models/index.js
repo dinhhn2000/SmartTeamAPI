@@ -1,16 +1,15 @@
 "use strict";
 const OtpModel = require("./otp.model");
 const PriorityModel = require("./priorities.model");
-const ProjectUserModel = require("./project_user.model");
+const ProjectUserModel = require("./projectUser.model");
 const ProjectModel = require("./project.model");
 const RoleModel = require("./roles.model");
 const StateModel = require("./states.model");
-const TeamUserModel = require("./team_user.model");
+const TeamUserModel = require("./teamUser.model");
 const TeamModel = require("./teams.model");
 const UserModel = require("./users.model");
 const TaskModel = require("./tasks.model");
-const TaskTypeModel = require("./task_types.model");
-const TaskUserModel = require("./task_user.model");
+const TaskTypeModel = require("./taskTypes.model");
 
 const { bcrypt, getSalt } = require("../utils/Encrypt");
 
@@ -36,9 +35,7 @@ module.exports = {
                 });
             } else throw error;
           });
-        } catch (e) {
-          
-        }
+        } catch (e) {}
       });
       await RoleModel.sync().then(async () => {
         try {
@@ -54,9 +51,7 @@ module.exports = {
             where: { idRole: 3 },
             defaults: { name: "Member" }
           });
-        } catch (e) {
-          
-        }
+        } catch (e) {}
         // console.log("Roles table created");
       });
       await TeamModel.sync();
@@ -82,9 +77,15 @@ module.exports = {
             where: { idState: 5 },
             defaults: { name: "Closed completed" }
           });
-        } catch (e) {
-          
-        }
+          await StateModel.findOrCreate({
+            where: { idState: 6 },
+            defaults: { name: "Assigned" }
+          });
+          await StateModel.findOrCreate({
+            where: { idState: 7 },
+            defaults: { name: "Done" }
+          });
+        } catch (e) {}
         // console.log("States table created");
       });
       await PriorityModel.sync().then(async () => {
@@ -105,9 +106,7 @@ module.exports = {
             where: { idPriority: 4 },
             defaults: { name: "Critical" }
           });
-        } catch (e) {
-          
-        }
+        } catch (e) {}
         // console.log("Prioritys table created");
       });
       await ProjectModel.sync();
@@ -128,16 +127,17 @@ module.exports = {
             where: { idType: 3 },
             defaults: { name: "Deployed" }
           });
-        } catch (e) {
-          
-        }
+        } catch (e) {}
       });
       await TaskModel.sync();
-      await TaskUserModel.sync();
       await createUserData();
-    } catch (e) {
-      
-    }
+    } catch (e) {}
+  },
+  associate: () => {
+    // TeamUserModel.belongsTo(TeamModel, { foreignKey: "idTeam" });
+    // TeamUserModel.belongsTo(UserModel, { foreignKey: "idUser" });
+    // TeamModel.hasMany(TeamUserModel, { foreignKey: "idTeam", as: "" });
+    // UserModel.hasMany(TeamUserModel, { foreignKey: "idUser", as: "" });
   },
   OtpModel,
   PriorityModel,
@@ -150,7 +150,6 @@ module.exports = {
   UserModel,
   TaskModel,
   TaskTypeModel,
-  TaskUserModel,
   excludeFieldsForUserInfo: [
     "email",
     "password",
@@ -183,7 +182,5 @@ const createUserData = async () => {
         }
       } else throw error;
     });
-  } catch (e) {
-    
-  }
+  } catch (e) {}
 };

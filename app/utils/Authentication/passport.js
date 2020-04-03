@@ -35,7 +35,6 @@ const jwt = new JWTStrategy(
         return cb(null, false, { message: "Not found user" });
       }
     } catch (e) {
-      
       return cb(e);
     }
   }

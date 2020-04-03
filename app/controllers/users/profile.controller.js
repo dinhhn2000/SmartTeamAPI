@@ -4,7 +4,6 @@ const response = require("../../utils/Responses");
 const cloudinary = require("cloudinary").v2;
 
 const validators = require("../../utils/Validations/validations");
-const helpers = require("../../utils/Helpers/index");
 const { UserModel } = require("../../models");
 const { JWT_SECRET, expireTime } = require("../../utils/Constants");
 
@@ -30,11 +29,10 @@ module.exports = {
       if (!user) {
         return response.error(res, req.message);
       }
-      let { firstName, lastName, avatar, email, gender, dob } = user;
-      let profile = { firstName, lastName, avatar, email, gender, dob };
+      let { idUser, firstName, lastName, avatar, email, gender, dob } = user;
+      let profile = { idUser, firstName, lastName, avatar, email, gender, dob };
       return response.success(res, "Get profile success", profile);
     } catch (e) {
-      
       return response.error(res, "Cannot get profile", e);
     }
   },
@@ -42,25 +40,23 @@ module.exports = {
     try {
       let { user } = req;
       let { dob } = req.body;
-      console.log(req.body);
-      
       validators.validateProfileInfo(req.body);
-      if (typeof dob !== "undefined")
-        req.body.dob = helpers.convertDateToDATE(dob, "dob");
+
+      // Check email
+      if (user.password !== null && req.body.email !== undefined) delete req.body.email;
 
       await UserModel.update(req.body, { where: { idUser: user.idUser } });
 
       return response.success(res, "Update profile success");
     } catch (e) {
-      
       return response.error(res, "Something wrong when update profile", e);
     }
   },
   updateAvatar: async (req, res, next) => {
     try {
       const { user } = req;
-      console.log(req.file.path);
-      
+      // console.log(req.file.path);
+
       let uploadResult = await cloudinary.uploader.upload(req.file.path);
       await UserModel.update(
         { avatar: uploadResult.url },
@@ -69,7 +65,6 @@ module.exports = {
 
       return response.success(res, "Update avatar success", uploadResult.url);
     } catch (e) {
-      
       return response.error(res, "Something wrong when update avatar", e);
     }
   }
@@ -93,7 +88,7 @@ module.exports = {
   //       } else throw "Upsert role failed";
   //     } else throw "Cannot set higher role than yours for this user";
   //   } catch (e) {
-  //     
+  //
   //     return response.error(res, "Cannot set role", e);
   //   }
   // }

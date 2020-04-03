@@ -7,7 +7,7 @@ RUN npm install nodemon -g
 
 WORKDIR /src
 ADD app/package.json /src/package.json
-ADD app/wait-for-it.sh /src/wait-for-it.sh
+# ADD app/wait-for-it.sh /src/wait-for-it.sh
 RUN npm install
 
 EXPOSE 3000

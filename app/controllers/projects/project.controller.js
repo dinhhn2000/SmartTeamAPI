@@ -64,43 +64,42 @@ module.exports = {
   },
   createProject: async (req, res, next) => {
     let { user } = req;
-    let { idTeam, finishedAt } = req.body;
+    let { idTeam, startedAt, finishedAt } = req.body;
     try {
       // Validate fields
       validators.validateProjectInfo(req.body);
-      finishedAt = helpers.convertDateToDATE(finishedAt, "finishedAt");
-      validators.isInFuture(finishedAt, "finishedAt");
-      req.body.finishedAt = finishedAt;
 
-      // if (!user) throw "User not found";
+      let teamRecord = await models.TeamModel.findOne({
+        where: { idTeam },
+        raw: true
+      });
+      if (!teamRecord) throw "Team not exist";
+
       let teamUserRecord = await models.TeamUserModel.findOne({
         where: { idTeam, idUser: user.idUser, idRole: 2 }
       });
       if (!teamUserRecord) throw "This account is not admin in this team";
 
       // Call create transaction
-      let newProject = await transactions.createProject({
-        ...req.body,
-        idUser: user.idUser
-      });
+      // Add some properties to req.body
+      req.body.short_name = helpers.shortenName(req.body.name);
+      req.body.state = 2;
+      let newProject = await transactions.createProject(req.body, user.idUser);
       return response.created(res, "Create project success", newProject);
     } catch (e) {
+      console.log(e);
+
       return response.error(res, "Create project fail", e);
     }
   },
   updateProject: async (req, res, next) => {
     let { user } = req;
-    let { idProject, name, finishedAt } = req.body;
+    let { idProject, name } = req.body;
     try {
       // Validation
       // if (!user) throw "User not found";
       validators.validateUpdateProjectInfo(req.body);
-      if (finishedAt !== undefined) {
-        finishedAt = helpers.convertDateToDATE(finishedAt, "finishedAt");
-        validators.isInFuture(finishedAt, "finishedAt");
-        req.body.finishedAt = finishedAt;
-      }
-      if (typeof name !== "undefined") req.body.short_name = helpers.shortenName(name);
+      if (name !== undefined) req.body.short_name = helpers.shortenName(name);
 
       let projectRecord = await models.ProjectModel.findOne({
         where: { idProject },

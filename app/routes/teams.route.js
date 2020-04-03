@@ -1,36 +1,16 @@
 "use strict";
 const express = require("express");
 const router = express.Router();
-const passport = require("passport");
+const jwtAuth = require("../utils/Middlewares/jwtAuth");
 
 const TeamController = require("../controllers/teams/team.controller");
 
 // MANAGE TEAMS
 
-router.get(
-  "/list",
-  passport.authenticate("jwt", { session: false }),
-  TeamController.getTeamList
-);
-router.get(
-  "/list-members",
-  passport.authenticate("jwt", { session: false }),
-  TeamController.getTeamMemberList
-);
-router.post(
-  "/create",
-  passport.authenticate("jwt", { session: false }),
-  TeamController.createTeam
-);
-router.post(
-  "/add-members",
-  passport.authenticate("jwt", { session: false }),
-  TeamController.addMembers
-);
-router.delete(
-  "/remove-members",
-  passport.authenticate("jwt", { session: false }),
-  TeamController.removeMembers
-);
+router.get("/list", jwtAuth, TeamController.getTeamList);
+router.get("/list-members", jwtAuth, TeamController.getTeamMemberList);
+router.post("/create", jwtAuth, TeamController.createTeam);
+router.post("/add-members", jwtAuth, TeamController.addMembers);
+router.delete("/remove-members", jwtAuth, TeamController.removeMembers);
 
 module.exports = router;

@@ -2,7 +2,7 @@
 const { DataTypes } = require("sequelize");
 const db = require("../utils/DB");
 
-const TaskType = db.sequelize.define("Task_Types", {
+const TaskType = db.sequelize.define("TaskTypes", {
   idType: {
     allowNull: false,
     primaryKey: true,

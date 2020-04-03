@@ -6,7 +6,7 @@ const helpers = require("../../utils/Helpers");
 
 module.exports = {
   createTeam: async (name, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         // Create new Team
         if (typeof name === "undefined") throw "Missing name field";
@@ -23,11 +23,10 @@ module.exports = {
           { transaction: t }
         );
 
-        await t.commit();
         return newTeam;
       } catch (e) {
         console.log(e.errors);
-        if (t) await t.rollback();
+
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
@@ -35,31 +34,29 @@ module.exports = {
     });
   },
   removeTeam: async (idTeam, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         let teamRecord = await models.TeamModel.findOne({
-          where: { idTeam: idTeam }
+          where: { idTeam}
         });
         if (!teamRecord) throw "Team not exist";
 
         let isAdmin = await models.TeamUserModel.findOne({
-          where: { idUser, idRole: 2, idTeam: idTeam }
+          where: { idUser, idRole: 2, idTeam}
         });
         if (!isAdmin) throw "This account is not the admin in this team";
 
         await models.TeamUserModel.destroy({
-          where: { idTeam: idTeam },
+          where: { idTeam},
           transaction: t
         });
         await models.TeamModel.destroy({
-          where: { idTeam: idTeam },
+          where: { idTeam},
           transaction: t
         });
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
@@ -67,22 +64,22 @@ module.exports = {
     });
   },
   addMembers: async (idTeam, members, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         let teamRecord = await models.TeamModel.findOne({
-          where: { idTeam: idTeam },
+          where: { idTeam},
           raw: true
         });
         if (!teamRecord) throw "Team not exist";
 
         let adminRecord = await models.TeamUserModel.findOne({
-          where: { idTeam: idTeam, idUser, idRole: 2 },
+          where: { idTeam, idUser, idRole: 2 },
           raw: true
         });
         if (!adminRecord) throw "This account is not admin in this team";
 
         let teamUserRecords = await models.TeamUserModel.findAll({
-          where: { idUser: { [Op.in]: members }, idTeam: idTeam },
+          where: { idUser: { [Op.in]: members }, idTeam},
           raw: true
         });
         if (teamUserRecords.length > 0)
@@ -95,14 +92,12 @@ module.exports = {
           throw `Some of the members are not existed`;
 
         let data = members.map(member => {
-          return { idUser: member, idTeam: idTeam, idRole: 3 };
+          return { idUser: member, idTeam, idRole: 3 };
         });
         await models.TeamUserModel.bulkCreate(data, { transaction: t });
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
@@ -110,19 +105,19 @@ module.exports = {
     });
   },
   removeMembers: async (idTeam, members, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         let teamRecord = await models.TeamModel.findOne({
-          where: { idTeam: idTeam },
+          where: { idTeam},
           raw: true
         });
         if (!teamRecord) throw "Team not exist";
 
-        let teamUserRecord = await models.TeamUserModel.findOne({
-          where: { idTeam: idTeam, idUser, idRole: 2 },
+        let adminRecord = await models.TeamUserModel.findOne({
+          where: { idTeam, idUser, idRole: 2 },
           raw: true
         });
-        if (!teamUserRecord) throw "This account is not admin in this team";
+        if (!adminRecord) throw "This account is not admin in this team";
 
         if (members.includes(idUser)) members.splice(members.indexOf(idUser), 1);
         let result = await models.TeamUserModel.destroy({
@@ -130,10 +125,8 @@ module.exports = {
         });
         if (result === 0) throw "Non of these members are in this team";
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;

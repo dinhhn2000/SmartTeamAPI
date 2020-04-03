@@ -50,8 +50,12 @@ const Project = db.sequelize.define(
         deferrable: Deferrable.INITIALLY_DEFERRED
       }
     },
-    finishedAt: {
+    startedAt: {
       allowNull: false,
+      type: DataTypes.DATE
+    },
+    finishedAt: {
+      allowNull: true,
       type: DataTypes.DATE
     }
   },

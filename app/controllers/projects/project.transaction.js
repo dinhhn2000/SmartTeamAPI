@@ -5,22 +5,13 @@ const db = require("../../utils/DB");
 const helpers = require("../../utils/Helpers");
 
 module.exports = {
-  createProject: async ({ name, idTeam, description, priority, finishedAt, idUser }) => {
-    return db.sequelize.transaction().then(async t => {
+  createProject: async (projectInfo, idUser) => {
+    return db.sequelize.transaction(async t => {
       try {
         // Create new Project
-        let newProject = await models.ProjectModel.create(
-          {
-            name,
-            short_name: helpers.shortenName(name),
-            idTeam: idTeam,
-            description,
-            state: 2,
-            priority,
-            finishedAt
-          },
-          { transaction: t }
-        );
+        let newProject = await models.ProjectModel.create(projectInfo, {
+          transaction: t
+        });
         await models.ProjectUserModel.create(
           {
             idUser,
@@ -29,10 +20,8 @@ module.exports = {
           },
           { transaction: t }
         );
-        await t.commit();
         return newProject;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
@@ -40,7 +29,7 @@ module.exports = {
     });
   },
   removeProject: async (idProject, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         let projectRecord = await models.ProjectModel.findOne({
           where: { idProject }
@@ -59,10 +48,8 @@ module.exports = {
           where: { idProject },
           transaction: t
         });
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
@@ -70,7 +57,7 @@ module.exports = {
     });
   },
   addMembers: async (idProject, members, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         let projectRecord = await models.ProjectModel.findOne({
           where: { idProject },
@@ -105,10 +92,8 @@ module.exports = {
         });
         await models.ProjectUserModel.bulkCreate(data, { transaction: t });
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
@@ -116,13 +101,14 @@ module.exports = {
     });
   },
   removeMembers: async (idProject, members, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         let projectRecord = await models.ProjectModel.findOne({
           where: { idProject },
           raw: true
         });
         if (!projectRecord) throw "Project not exist";
+
         let projectUserRecord = await models.ProjectUserModel.findOne({
           where: { idProject, idUser, idRole: 2 },
           raw: true
@@ -135,10 +121,8 @@ module.exports = {
         });
         if (result === 0) throw "Non of these members are in this project";
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;

@@ -16,12 +16,27 @@ module.exports = {
       });
       let teamListIndex = teamUserRecords.map(record => record.idTeam);
       let teamList = await models.TeamModel.findAll({
+        // include: [
+        //   {
+        //     model: models.TeamUserModel,
+        //     attributes: {
+        //       exclude: ["idUser", "idTeam", "createdAt", "updatedAt"]
+        //     }
+        //   }
+        // ],
         where: { idTeam: { [Op.in]: teamListIndex } },
         raw: true
       });
+      teamList = teamList.map(team => {
+        let index = teamListIndex.indexOf(team.idTeam);
+        team.idRole = teamUserRecords[index].idRole;
+        return team;
+      });
+
       return response.success(res, "Get list of teams success", teamList);
     } catch (e) {
-      
+      console.log(e);
+
       return response.error(res, "Get list of teams fail", e);
     }
   },
@@ -32,7 +47,7 @@ module.exports = {
       if (idTeam === undefined || idTeam === "") throw "Required idTeam";
       let membersId = await models.TeamUserModel.findAll({
         attributes: ["idUser"],
-        where: { idTeam: idTeam },
+        where: { idTeam},
         raw: true
       });
       if (membersId.length === 0) throw "This team is not exist";
@@ -46,7 +61,6 @@ module.exports = {
       });
       return response.success(res, "Get list of members success", membersInfo);
     } catch (e) {
-      
       return response.error(res, "Get list of team's member fail", e);
     }
   },
@@ -56,10 +70,9 @@ module.exports = {
     try {
       // if (!user) throw "User not found";
       if (name === undefined || name === "") throw "Required name";
-      await transactions.createTeam(name, user.idUser);
-      return response.created(res, "Create team success");
+      let newTeam = await transactions.createTeam(name, user.idUser);
+      return response.created(res, "Create team success", newTeam);
     } catch (e) {
-      
       return response.error(res, "Create team fail", e);
     }
   },
@@ -72,7 +85,6 @@ module.exports = {
       await transactions.addMembers(idTeam, members, user.idUser);
       return response.created(res, "Add team's member success");
     } catch (e) {
-      
       return response.error(res, "Add team's member fail", e);
     }
   },
@@ -84,7 +96,6 @@ module.exports = {
       await transactions.removeMembers(idTeam, members, user.idUser);
       return response.accepted(res, "Remove project's member success");
     } catch (e) {
-      
       return response.error(res, "Remove project's member fail", e);
     }
   }

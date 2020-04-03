@@ -40,7 +40,7 @@ module.exports = {
       });
   },
   error: (response, message, error) => {
-    console.log(error);
+    // console.log(error);
     if (typeof error !== "undefined")
       if (typeof error.message === "undefined")
         return response.status(400).json({
@@ -59,5 +59,11 @@ module.exports = {
         message,
         result: "FAIL"
       });
+  },
+  unauthorized: (response, message) => {
+    return response.status(401).json({
+      message,
+      result: "FAIL",
+    });
   }
 };

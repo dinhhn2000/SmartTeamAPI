@@ -1,45 +1,19 @@
 "use strict";
 const express = require("express");
 const router = express.Router();
-const passport = require("passport");
+const jwtAuth = require("../utils/Middlewares/jwtAuth");
 
 const TaskController = require("../controllers/tasks/task.controller");
 
 // MANAGE TASKS
-router.get(
-  "/list",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.getTaskList
-);
-router.get(
-  "/list-members",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.getTaskMemberList
-);
-router.post(
-  "/create",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.createTask
-);
-router.put(
-  "/update",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.updateTask
-);
-router.delete(
-  "/remove",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.removeTask
-);
-router.post(
-  "/add-members",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.addMembers
-);
-router.delete(
-  "/remove-members",
-  passport.authenticate("jwt", { session: false }),
-  TaskController.removeMembers
-);
+router.get("/", jwtAuth, TaskController.getTask);
+router.get("/list", jwtAuth, TaskController.getTaskList);
+router.get("/list-members", jwtAuth, TaskController.getTaskMember);
+router.post("/create", jwtAuth, TaskController.createTask);
+router.put("/update", jwtAuth, TaskController.updateTask);
+router.delete("/remove", jwtAuth, TaskController.removeTask);
+router.post("/add-members", jwtAuth, TaskController.addMember);
+router.post("/update-members", jwtAuth, TaskController.updateMember);
+router.delete("/remove-members", jwtAuth, TaskController.removeMember);
 
 module.exports = router;

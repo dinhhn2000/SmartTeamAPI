@@ -23,7 +23,7 @@ var app = express();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
-app.set("view engine", "jade");
+app.set("view engine", "pug");
 
 // cloudinary config
 cloudinary.config({ cloud_name, api_key, api_secret });
@@ -39,6 +39,7 @@ app.use(passport.initialize());
 
 // Sync all models
 require("./models").sync();
+require("./models").associate();
 
 app.use("/", routes);
 app.use("/users", users);

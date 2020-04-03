@@ -1,7 +1,7 @@
 "use strict";
 const express = require("express");
 const router = express.Router();
-const passport = require("passport");
+const jwtAuth = require("../utils/Middlewares/jwtAuth");
 
 const UserController = require("../controllers/users/user.controller");
 const ProfileController = require("../controllers/users/profile.controller");
@@ -27,19 +27,11 @@ router.post("/verify/resend", UserController.verifyAccountResend);
 router.post("/verify", UserController.verifyAccount);
 
 // MANAGE PROFILE
-router.get(
-  "/profile",
-  passport.authenticate("jwt", { session: false }),
-  ProfileController.getProfile
-);
-router.post(
-  "/profile/update",
-  passport.authenticate("jwt", { session: false }),
-  ProfileController.updateProfile
-);
+router.get("/profile", jwtAuth, ProfileController.getProfile);
+router.post("/profile/update", jwtAuth, ProfileController.updateProfile);
 router.post(
   "/profile/update-avatar",
-  passport.authenticate("jwt", { session: false }),
+  jwtAuth,
   upload.single("avatar"),
   ProfileController.updateAvatar
 );
@@ -47,7 +39,7 @@ router.post("/change-password", UserController.changePassword);
 router.post("/change-password/verify", UserController.verifyChangePassword);
 // router.post(
 //   "/set-role",
-//   passport.authenticate("jwt", { session: false }),
+//   jwtAuth,
 //   ProfileController.setRole
 // );
 

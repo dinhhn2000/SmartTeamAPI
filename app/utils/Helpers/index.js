@@ -5,5 +5,9 @@ module.exports = {
 
   convertDateToDATE: (date, fieldName) => {
     return require("./convertDateToDATE.helper").convertDateToDATE(date, fieldName);
+  },
+
+  roundPoints: function(points) {
+    return Math.round(points * 4) / 4;
   }
 };

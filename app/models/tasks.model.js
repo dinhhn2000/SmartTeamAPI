@@ -21,6 +21,15 @@ const Task = db.sequelize.define("Tasks", {
       deferrable: Deferrable.INITIALLY_DEFERRED
     }
   },
+  idUser: {
+    allowNull: true,
+    type: DataTypes.INTEGER,
+    references: {
+      model: "Users",
+      key: "idUser",
+      deferrable: Deferrable.INITIALLY_DEFERRED
+    }
+  },
   name: {
     allowNull: false,
     type: DataTypes.STRING
@@ -36,16 +45,38 @@ const Task = db.sequelize.define("Tasks", {
     allowNull: true,
     type: DataTypes.DATE
   },
+  workedTime: {
+    allowNull: true,
+    type: intervalDataTypes.INTERVAL
+  },
+  remainTime: {
+    allowNull: true,
+    type: intervalDataTypes.INTERVAL
+  },
+  progress: {
+    allowNull: false,
+    type: DataTypes.FLOAT,
+    defaultValue: 0
+  },
   points: {
     allowNull: false,
-    type: DataTypes.INTEGER
+    type: DataTypes.FLOAT
   },
   type: {
     allowNull: false,
     type: DataTypes.INTEGER,
     references: {
-      model: "Task_Types",
+      model: "TaskTypes",
       key: "idType",
+      deferrable: Deferrable.INITIALLY_DEFERRED
+    }
+  },
+  state: {
+    allowNull: false,
+    type: DataTypes.INTEGER,
+    references: {
+      model: "States",
+      key: "idState",
       deferrable: Deferrable.INITIALLY_DEFERRED
     }
   },

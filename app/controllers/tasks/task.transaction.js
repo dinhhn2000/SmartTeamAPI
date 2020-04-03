@@ -1,12 +1,12 @@
 "use strict";
 const models = require("../../models");
-const { Op } = require("sequelize");
 const db = require("../../utils/DB");
 
 module.exports = {
   createTask: async taskInfo => {
     try {
       // Create new Task
+      taskInfo.state = 2; // State 2: Open
       const newTask = await models.TaskModel.create(taskInfo);
       return newTask;
     } catch (e) {
@@ -26,7 +26,7 @@ Cannot add transaction to this create method:
 */
   },
   removeTask: async (idTask, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+    return db.sequelize.transaction(async t => {
       try {
         // Check task
         let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -38,22 +38,19 @@ Cannot add transaction to this create method:
         });
         if (!isAdmin) throw "This account is not the admin in this project";
         else {
-          await models.TaskUserModel.destroy({ where: { idTask }, transaction: t });
           await models.TaskModel.destroy({ where: { idTask }, transaction: t });
         }
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
       }
     });
   },
-  addMembers: async (idTask, members, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+  addMember: async (idTask, member, idUser) => {
+    return db.sequelize.transaction(async t => {
       try {
         // Check task
         let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -65,39 +62,31 @@ Cannot add transaction to this create method:
         });
         if (!isAdmin) throw "This account is not the admin in this project";
 
-        // Check if any member already in task
-        let taskUserRecords = await models.TaskUserModel.findAll({
-          where: { idTask, idUser: { [Op.in]: members } },
-          raw: true
-        });
-        if (taskUserRecords.length > 0)
-          throw "Some of the members are already in the team";
+        // Check if member already in task
+        if (!!taskRecord.idUser) throw "This task already has been assigned";
 
-        // Check if all members are in the project
-        let memberRecord = await models.ProjectUserModel.findAll({
-          where: { idUser: { [Op.in]: members }, idProject: taskRecord.idProject }
+        // Check if member is in the project
+        let memberRecord = await models.ProjectUserModel.findOne({
+          where: { idUser: member, idProject: taskRecord.idProject }
         });
-        if (memberRecord.length < members.length)
-          throw `Some of the members are not in the project`;
+        if (memberRecord) throw `This member not in this project`;
 
         // Add member
-        let data = members.map(member => {
-          return { idUser: member, idTask };
-        });
-        await models.TaskUserModel.bulkCreate(data, { transaction: t });
+        await models.TaskModel.update(
+          { idUser: member, state: 6 }, // State 6: assigned
+          { where: { idTask }, transaction: t }
+        );
 
-        await t.commit();
         return true;
       } catch (e) {
-        if (t) await t.rollback();
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
       }
     });
   },
-  removeMembers: async (idTask, members, idUser) => {
-    return db.sequelize.transaction().then(async t => {
+  updateMember: async (idTask, member, idUser) => {
+    return db.sequelize.transaction(async t => {
       try {
         // Check task
         let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -109,16 +98,54 @@ Cannot add transaction to this create method:
         });
         if (!isAdmin) throw "This account is not the admin in this project";
 
-        if (members.includes(idUser)) members.splice(members.indexOf(idUser), 1);
-        let result = await models.TaskUserModel.destroy({
-          where: { idUser: { [Op.in]: members } }
+        // Check if member is in the project
+        let memberRecord = await models.ProjectUserModel.findOne({
+          where: { idUser: member, idProject: taskRecord.idProject }
         });
-        if (result === 0) throw "Non of these members are in this task";
+        if (memberRecord) throw `This member not in this project`;
 
-        await t.commit();
+        // Update member
+        await models.TaskModel.update(
+          { idUser: member },
+          { where: { idTask }, transaction: t }
+        );
+
         return true;
       } catch (e) {
-        if (t) await t.rollback();
+        // Database errors
+        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        throw e;
+      }
+    });
+  },
+  removeMember: async (idTask, member, idUser) => {
+    return db.sequelize.transaction(async t => {
+      try {
+        // Check member
+        let memberRecord = await models.UserModel.findOne({ where: { idUser: member } });
+        if (!memberRecord) throw "This member not exist";
+
+        // Check task
+        let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
+        if (!taskRecord) throw "Task not exist";
+
+        // Check admin
+        let isAdmin = await models.ProjectUserModel.findOne({
+          where: { idUser, idRole: 2, idProject: taskRecord.idProject }
+        });
+        if (!isAdmin) throw "This account is not the admin in this project";
+
+        // Check in project
+        if (member !== taskRecord.idUser) throw "This member is not in this task";
+
+        // Remove member
+        await models.TaskModel.update(
+          { idUser: null },
+          { where: { idTask }, transaction: t }
+        );
+
+        return true;
+      } catch (e) {
         // Database errors
         if (e.errors !== undefined) throw e.errors.map(error => error.message);
         throw e;
