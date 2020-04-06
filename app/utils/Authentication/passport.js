@@ -9,7 +9,7 @@ const LocalStrategy = passportLocal.Strategy;
 const JWTStrategy = passportJWT.Strategy;
 const ExtractJWT = passportJWT.ExtractJwt;
 
-const { UserModel } = require("../../models");
+const { UserModel } = require("../Models");
 const { JWT_SECRET, facebookClientId, facebookClientSecret } = require("../Constants");
 
 passport.serializeUser((user, done) => {

@@ -1,10 +1,10 @@
 "use strict";
 const google = require("googleapis").google;
 const OAuth2 = google.auth.OAuth2;
-const { googleClientId, googleClientSecret } = require("../Constants");
+const { googleClientId, googleClientSecret } = require("../../utils/Constants");
 const oauth2Client = new OAuth2(googleClientId, googleClientSecret);
 
-const { UserModel } = require("../../models");
+const { UserModel } = require("../Models");
 module.exports = {
   oauth: async access_token => {
     try {
@@ -39,7 +39,6 @@ module.exports = {
         return newUser;
       }
     } catch (e) {
-      
       return e;
     }
   }

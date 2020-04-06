@@ -13,11 +13,11 @@ const api_key = process.env.CLOUDINARY_API_KEY;
 const api_secret = process.env.CLOUDINARY_API_SECRET;
 require("./utils/Authentication/passport");
 
-const routes = require("./routes/index");
-const users = require("./routes/users.route");
-const projects = require("./routes/projects.route");
-const teams = require("./routes/teams.route");
-const tasks = require("./routes/tasks.route");
+const routes = require("./routes");
+const users = require("./components/Users/routes");
+const projects = require("./components/Projects/routes");
+const teams = require("./components/Teams/routes");
+const tasks = require("./components/Tasks/routes");
 
 var app = express();
 
@@ -38,9 +38,10 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 
 // Sync all models
-require("./models").sync();
-require("./models").associate();
+require("./utils/Models").sync();
+require("./utils/Models").associate();
 
+// Intialize routes
 app.use("/", routes);
 app.use("/users", users);
 app.use("/projects", projects);
