@@ -8,9 +8,9 @@ const helpers = require("../../../utils/Helpers");
 module.exports = {
   getTask: async (req, res, next) => {
     let { user } = req;
-    let idTask = req.query.idTask;
+    let idTask = req.query.id;
     try {
-      if (idTask === undefined || idTask === "") throw "Required idProject";
+      if (idTask === undefined || idTask === "") throw "Required id (idTask)";
       validators.validateId(idTask);
 
       let taskInfo = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -18,7 +18,7 @@ module.exports = {
 
       // Check is in project
       let isInProject = await models.ProjectUserModel.findOne({
-        where: { idUser: user.idUser, idProject: taskInfo.idProject }
+        where: { idUser: user.idUser, idProject: taskInfo.idProject },
       });
       if (!isInProject) throw "This account is not in this project";
 
@@ -29,13 +29,13 @@ module.exports = {
   },
   getTaskList: async (req, res, next) => {
     let { user } = req;
-    let { idProject } = req.body;
+    let idProject = req.query.id;
     try {
-      if (idProject === undefined || idProject === "") throw "Required idProject";
+      if (idProject === undefined || idProject === "") throw "Required id (idProject)";
 
       // Check is in project
       let isInProject = await models.ProjectUserModel.findOne({
-        where: { idUser: user.idUser, idProject }
+        where: { idUser: user.idUser, idProject },
       });
       if (!isInProject) throw "This project not exist";
 
@@ -47,9 +47,9 @@ module.exports = {
   },
   getTaskMember: async (req, res, next) => {
     let { user } = req;
-    let { idTask } = req.body;
+    let idTask = req.query.id;
     try {
-      if (idTask === undefined || idTask === "") throw "Required idTask";
+      if (idTask === undefined || idTask === "") throw "Required id (idTask)";
 
       // Check task
       let taskRecord = await models.TaskModel.findOne({ where: { idTask } });
@@ -57,17 +57,17 @@ module.exports = {
 
       // Check is in the project
       let isInProject = await models.ProjectUserModel.findOne({
-        where: { idUser: user.idUser, idProject: taskRecord.idProject }
+        where: { idUser: user.idUser, idProject: taskRecord.idProject },
       });
       if (!isInProject) throw "This account is not in this project";
 
       // Get list member's info
       let memberInfo = await models.UserModel.findOne({
         attributes: {
-          exclude: models.excludeFieldsForUserInfo
+          exclude: models.excludeFieldsForUserInfo,
         },
         where: { idUser: taskRecord.idUser },
-        raw: true
+        raw: true,
       });
       return response.success(res, "Get list of member success", memberInfo);
     } catch (e) {
@@ -76,8 +76,8 @@ module.exports = {
   },
   createTask: async (req, res, next) => {
     let { user } = req;
-    let { idProject, member } = req.body;
-    // let { name, description, points, idProject, startedAt, finishedAt, type, duration } = req.body;
+    let { idProject, member, idMilestone, startedAt, finishedAt } = req.body;
+    // let { name, description, points, idProject, startedAt, finishedAt, type, duration, idMilestone } = req.body;
     try {
       validators.validateTaskInfo(req.body);
 
@@ -87,7 +87,7 @@ module.exports = {
 
       // Check admin
       let isAdmin = await models.ProjectUserModel.findOne({
-        where: { idUser: user.idUser, idRole: 2, idProject }
+        where: { idUser: user.idUser, idRole: 2, idProject },
       });
       if (!isAdmin) throw "This account is not the admin in this project";
 
@@ -97,27 +97,41 @@ module.exports = {
         if (!isUser) throw "This member not exist";
 
         let isMember = await models.ProjectUserModel.findOne({
-          where: { idUser: member, idProject }
+          where: { idUser: member, idProject },
         });
-        if (!isMember) throw "This member is not in this team";
+        if (!isMember) throw "This member is not in this project";
         else req.body.idUser = member;
       }
 
       // Convert points to 0.25 format
       req.body.points = helpers.roundPoints(req.body.points);
 
+      // Check milestone
+      if (finishedAt !== undefined && startedAt !== undefined) {
+        let milestoneRecord = await models.MilestoneModel.findOne({
+          where: { idMilestone },
+          raw: true,
+        });
+        if (!milestoneRecord) throw "This milestone not exist";
+        if (milestoneRecord.idProject != idProject)
+          throw "This milestone not belongs to this project";
+        if (!helpers.isBeforeOrEqualThan(milestoneRecord.startedAt, startedAt))
+          throw "startedAt of this task is not in the milestone's time";
+        if (!helpers.isBeforeOrEqualThan(finishedAt, milestoneRecord.finishedAt))
+          throw "finishedAt of this task is not in the milestone's time";
+      }
+
       // Create task
       const newTask = await transactions.createTask(req.body);
       return response.created(res, "Create task success", newTask);
     } catch (e) {
-      console.log(e);
       return response.error(res, "Create task fail", e);
     }
   },
   updateTask: async (req, res, next) => {
     let { user } = req;
-    let { idTask } = req.body;
-    // let { idTask, name, description, points, finishedAt, type, duration } = req.body;
+    let { idTask, idMilestone, startedAt, finishedAt } = req.body;
+    // let { idTask, name, description, points, startedAt, finishedAt, type, duration, idMilestone  } = req.body;
     try {
       validators.validateUpdateTaskInfo(req.body);
 
@@ -127,7 +141,7 @@ module.exports = {
 
       // Check admin
       let isAdmin = await models.ProjectUserModel.findOne({
-        where: { idUser: user.idUser, idRole: 2, idProject: taskRecord.idProject }
+        where: { idUser: user.idUser, idRole: 2, idProject: taskRecord.idProject },
       });
       if (!isAdmin) throw "This account is not the admin in this project";
 
@@ -135,10 +149,45 @@ module.exports = {
       if (req.body.points !== undefined)
         req.body.points = helpers.roundPoints(req.body.points);
 
-      await models.TaskModel.update(req.body, {
-        where: { idTask },
-        raw: true
-      });
+      // Check milestone
+      let isMilestoneValid = false;
+      if (idMilestone !== undefined) {
+        isMilestoneValid = await models.MilestoneModel.findOne({
+          where: { idMilestone },
+          raw: true,
+        });
+        if (!isMilestoneValid) throw "This milestone not exist";
+        if (isMilestoneValid.idProject !== idProject)
+          throw "This milestone not belongs to this project";
+      }
+
+      // Check start and finish
+      if (finishedAt !== undefined || startedAt !== undefined) {
+        let milestoneRecord;
+        if (!!isMilestoneValid) milestoneRecord = isMilestoneValid;
+        else
+          milestoneRecord = await models.MilestoneModel.findOne({
+            where: { idMilestone: taskRecord.idMilestone },
+            raw: true,
+          });
+        if (startedAt !== undefined)
+          if (!helpers.isBeforeOrEqualThan(milestoneRecord.startedAt, startedAt))
+            throw "startedAt of this task is not in the milestone's time";
+
+        if (finishedAt !== undefined)
+          if (!helpers.isBeforeOrEqualThan(finishedAt, milestoneRecord.finishedAt))
+            throw "finishedAt of this task is not in the milestone's time";
+
+        if (startedAt !== undefined && finishedAt === undefined)
+          if (!helpers.isBeforeOrEqualThan(startedAt, taskRecord.finishedAt))
+            throw "startedAt cannot be after finishedAt";
+
+        if (startedAt === undefined && finishedAt !== undefined)
+          if (!helpers.isBeforeOrEqualThan(taskRecord.startedAt, finishedAt))
+            throw "finishedAt cannot be after startedAt";
+      }
+
+      await models.TaskModel.update(req.body, { where: { idTask }, raw: true });
       return response.accepted(res, "Update task success");
     } catch (e) {
       return response.error(res, "Update task fail", e);
@@ -148,7 +197,6 @@ module.exports = {
     let { user } = req;
     let { idTask, workedTime, remainTime } = req.body;
     try {
-      // if (!user) throw "User not found";
       validators.validateUpdateTaskProgress(req.body);
 
       // Check task
@@ -225,7 +273,6 @@ module.exports = {
     let { user } = req;
     let { idTask } = req.body;
     try {
-      // if (!user) throw "User not found";
       if (idTask === undefined || idTask === "") throw "Required idTask";
 
       // Check task
@@ -237,7 +284,7 @@ module.exports = {
         throw "This account is not assigned for this task";
 
       await models.TaskModel.update(
-        { workedTime: "0", remainTime: "0", progress: 0 },
+        { workedTime: "00:00", remainTime: taskRecord.duration, progress: 0 },
         { where: { idTask }, raw: true }
       );
       return response.accepted(res, "Start working task success");
@@ -249,7 +296,6 @@ module.exports = {
     let { user } = req;
     let { idTask, workedTime } = req.body;
     try {
-      // if (!user) throw "User not found";
       if (idTask === undefined || idTask === "") throw "Required idTask";
       validators.validateInterval(workedTime);
 
@@ -262,12 +308,12 @@ module.exports = {
         throw "This account is not assigned for this task";
 
       await models.TaskModel.update(
-        { workedTime, remainTime: "0", progress: 100 },
+        { workedTime, remainTime: "", progress: 100 },
         { where: { idTask }, raw: true }
       );
       return response.accepted(res, "End task success");
     } catch (e) {
       return response.error(res, "End task fail", e);
     }
-  }
+  },
 };

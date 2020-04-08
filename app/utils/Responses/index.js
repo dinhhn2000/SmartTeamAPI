@@ -5,12 +5,12 @@ module.exports = {
       return response.status(200).json({
         message,
         result: "OK",
-        payload
+        payload,
       });
     else
       return response.status(200).json({
         message,
-        result: "OK"
+        result: "OK",
       });
   },
   created: (response, message, payload) => {
@@ -18,12 +18,12 @@ module.exports = {
       return response.status(201).json({
         message,
         result: "OK",
-        payload
+        payload,
       });
     else
       return response.status(201).json({
         message,
-        result: "OK"
+        result: "OK",
       });
   },
   accepted: (response, message, payload) => {
@@ -31,33 +31,34 @@ module.exports = {
       return response.status(202).json({
         message,
         result: "OK",
-        payload
+        payload,
       });
     else
       return response.status(202).json({
         message,
-        result: "OK"
+        result: "OK",
       });
   },
   error: (response, message, error) => {
-    // console.log(error);
+    console.log(error);
+    if (Array.isArray(error)) error = error[0];
     if (typeof error !== "undefined")
       if (typeof error.message === "undefined")
         return response.status(400).json({
           message,
           result: "FAIL",
-          error
+          error,
         });
       else
         return response.status(400).json({
           message,
           result: "FAIL",
-          error: error.message
+          error: error.message,
         });
     else
       return response.status(400).json({
         message,
-        result: "FAIL"
+        result: "FAIL",
       });
   },
   unauthorized: (response, message) => {
@@ -65,5 +66,5 @@ module.exports = {
       message,
       result: "FAIL",
     });
-  }
+  },
 };

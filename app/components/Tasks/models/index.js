@@ -10,7 +10,7 @@ const Task = db.sequelize.define("Tasks", {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
-    type: DataTypes.INTEGER
+    type: DataTypes.INTEGER,
   },
   idProject: {
     allowNull: false,
@@ -18,8 +18,8 @@ const Task = db.sequelize.define("Tasks", {
     references: {
       model: "Projects",
       key: "idProject",
-      deferrable: Deferrable.INITIALLY_DEFERRED
-    }
+      deferrable: Deferrable.INITIALLY_DEFERRED,
+    },
   },
   idUser: {
     allowNull: true,
@@ -27,49 +27,34 @@ const Task = db.sequelize.define("Tasks", {
     references: {
       model: "Users",
       key: "idUser",
-      deferrable: Deferrable.INITIALLY_DEFERRED
-    }
+      deferrable: Deferrable.INITIALLY_DEFERRED,
+    },
   },
-  name: {
+  idMilestone: {
     allowNull: false,
-    type: DataTypes.STRING
+    type: DataTypes.INTEGER,
+    references: {
+      model: "Milestones",
+      key: "idMilestone",
+      deferrable: Deferrable.INITIALLY_DEFERRED,
+    },
   },
-  description: {
-    type: DataTypes.STRING
-  },
-  startedAt: {
-    allowNull: true,
-    type: DataTypes.DATE
-  },
-  finishedAt: {
-    allowNull: true,
-    type: DataTypes.DATE
-  },
-  workedTime: {
-    allowNull: true,
-    type: intervalDataTypes.INTERVAL
-  },
-  remainTime: {
-    allowNull: true,
-    type: intervalDataTypes.INTERVAL
-  },
-  progress: {
-    allowNull: false,
-    type: DataTypes.FLOAT,
-    defaultValue: 0
-  },
-  points: {
-    allowNull: false,
-    type: DataTypes.FLOAT
-  },
+  name: { allowNull: false, type: DataTypes.STRING },
+  description: { type: DataTypes.STRING },
+  startedAt: { allowNull: true, type: DataTypes.DATE },
+  finishedAt: { allowNull: true, type: DataTypes.DATE },
+  workedTime: { allowNull: true, type: intervalDataTypes.INTERVAL },
+  remainTime: { allowNull: true, type: intervalDataTypes.INTERVAL },
+  progress: { allowNull: false, type: DataTypes.FLOAT, defaultValue: 0 },
+  points: { allowNull: false, type: DataTypes.FLOAT },
   type: {
     allowNull: false,
     type: DataTypes.INTEGER,
     references: {
       model: "TaskTypes",
       key: "idType",
-      deferrable: Deferrable.INITIALLY_DEFERRED
-    }
+      deferrable: Deferrable.INITIALLY_DEFERRED,
+    },
   },
   state: {
     allowNull: false,
@@ -77,13 +62,13 @@ const Task = db.sequelize.define("Tasks", {
     references: {
       model: "States",
       key: "idState",
-      deferrable: Deferrable.INITIALLY_DEFERRED
-    }
+      deferrable: Deferrable.INITIALLY_DEFERRED,
+    },
   },
   duration: {
     allowNull: false,
-    type: intervalDataTypes.INTERVAL
-  }
+    type: intervalDataTypes.INTERVAL,
+  },
 });
 
 module.exports = Task;

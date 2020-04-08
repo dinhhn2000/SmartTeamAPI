@@ -8,15 +8,15 @@ const Team = db.sequelize.define(
     idTeam: {
       type: DataTypes.INTEGER,
       primaryKey: true,
-      autoIncrement: true
+      autoIncrement: true,
     },
     name: {
       allowNull: false,
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     avatar: {
       allowNull: true,
-      type: DataTypes.STRING
+      type: DataTypes.STRING,
     },
     creator: {
       allowNull: false,
@@ -24,9 +24,9 @@ const Team = db.sequelize.define(
       references: {
         model: "Users",
         key: "idUser",
-        deferrable: Deferrable.INITIALLY_DEFERRED
-      }
-    }
+        deferrable: Deferrable.INITIALLY_DEFERRED,
+      },
+    },
   },
   { indexes: [{ unique: true, fields: ["name", "creator"] }] }
 );

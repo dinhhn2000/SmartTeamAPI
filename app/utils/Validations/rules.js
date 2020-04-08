@@ -21,6 +21,9 @@ module.exports = {
     members: "required|array|min:1",
     member: "required|numeric",
     id: "required|numeric",
+    workedTime: "required|intervalFormat",
+    remainTime: "required|intervalFormat",
+    duration: "required|intervalFormat",
   },
 
   // Non required rules (Use for update)
@@ -43,6 +46,9 @@ module.exports = {
     type: "numeric|between:1,3",
     members: "array|min:1",
     member: "numeric",
-    description: "string"
-  }
+    description: "string",
+    workedTime: "intervalFormat",
+    remainTime: "intervalFormat",
+    duration: "intervalFormat",
+  },
 };

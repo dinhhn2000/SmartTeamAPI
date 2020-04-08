@@ -15,7 +15,7 @@ function validateStartDateFinishDate(startDate, finishDate) {
 
 Validator.register(
   "intervalFormat",
-  function(value, requirement, attribute) {
+  function (value, requirement, attribute) {
     return value.match(/^([0-9]|[1-9][0-9])(:[0-5]?[0-9])$/);
   },
   "The :attribute has to be in format hh:mm"
@@ -23,25 +23,25 @@ Validator.register(
 
 Validator.register(
   "dateFormat",
-  function(value, requirement, attribute) {
+  function (value, requirement, attribute) {
     return value.match(/^([0-9]{4})(-)(1[0-2]|0[1-9])\2(3[01]|0[1-9]|[12][0-9])$/);
   },
   "The :attribute has to be in format YYYY-MM-DD"
 );
 
 module.exports = {
-  validateEmail: email => {
+  validateEmail: (email) => {
     let validation = new Validator({ email }, { email: rules.required.email });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validatePassword: password => {
+  validatePassword: (password) => {
     var re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
     if (!re.test(String(password)))
       throw "Password has to be at least 8 characters, contains at least 1 digit, 1 lower case, 1 upper case";
   },
 
-  validateAccessToken: access_token => {
+  validateAccessToken: (access_token) => {
     let validation = new Validator(
       { access_token },
       { access_token: rules.required.access_token }
@@ -65,18 +65,18 @@ module.exports = {
         lastName: rules.non_required.lastName,
         gender: rules.non_required.gender,
         email: rules.non_required.email,
-        dob: rules.non_required.dob
+        dob: rules.non_required.dob,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateOtp: otp => {
+  validateOtp: (otp) => {
     let validation = new Validator({ otp }, { otp: rules.required.otp });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateOtpTime: time => {
+  validateOtpTime: (time) => {
     var now = moment(new Date()); //get now
     var end = moment(new Date(time)); // get create time
     var duration = moment.duration(now.diff(end));
@@ -84,12 +84,12 @@ module.exports = {
     if (minutes > 5) throw "This OTP code is too old";
   },
 
-  validateGender: gender => {
+  validateGender: (gender) => {
     let validation = new Validator({ gender }, { gender: rules.required.gender });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateProjectInfo: projectInfo => {
+  validateProjectInfo: (projectInfo) => {
     let { name, priority, idTeam, startedAt, finishedAt, description } = projectInfo;
     let validation = new Validator(
       { name, priority, idTeam, startedAt, finishedAt, description },
@@ -99,14 +99,14 @@ module.exports = {
         priority: rules.required.priority,
         idTeam: rules.required.idTeam,
         finishedAt: rules.non_required.finishedAt,
-        startedAt: rules.required.startedAt
+        startedAt: rules.required.startedAt,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
     validateStartDateFinishDate(startedAt, finishedAt);
   },
 
-  validateUpdateProjectInfo: projectInfo => {
+  validateUpdateProjectInfo: (projectInfo) => {
     let {
       idProject,
       name,
@@ -114,7 +114,7 @@ module.exports = {
       priority,
       startedAt,
       finishedAt,
-      state
+      state,
     } = projectInfo;
     let validation = new Validator(
       { idProject, name, description, priority, startedAt, finishedAt, state },
@@ -125,30 +125,41 @@ module.exports = {
         state: rules.non_required.state,
         startedAt: rules.non_required.startedAt,
         finishedAt: rules.non_required.finishedAt,
-        idProject: rules.required.id
+        idProject: rules.required.id,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
     validateStartDateFinishDate(startedAt, finishedAt);
   },
 
-  validateHhMm: input => {
+  validateHhMm: (input) => {
     var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(input);
     return isValid;
   },
 
   validateTaskInfo: ({
     idProject,
+    idMilestone,
     name,
     points,
     startedAt,
     finishedAt,
     type,
     duration,
-    member
+    member,
   }) => {
     let validation = new Validator(
-      { name, points, startedAt, finishedAt, type, duration, idProject, member },
+      {
+        name,
+        points,
+        startedAt,
+        finishedAt,
+        type,
+        duration,
+        idProject,
+        idMilestone,
+        member,
+      },
       {
         name: rules.required.name,
         description: rules.non_required.description,
@@ -156,9 +167,10 @@ module.exports = {
         startedAt: rules.non_required.startedAt,
         finishedAt: rules.non_required.finishedAt,
         type: rules.required.type,
-        duration: "required|intervalFormat",
+        duration: rules.required.duration,
         idProject: rules.required.id,
-        member: rules.non_required.member
+        idMilestone: rules.required.id,
+        member: rules.non_required.member,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -170,8 +182,8 @@ module.exports = {
       { idTask, workedTime, remainTime },
       {
         idTask: rules.required.id,
-        workedTime: "intervalFormat",
-        remainTime: "intervalFormat"
+        workedTime: rules.required.workedTime,
+        remainTime: rules.required.remainTime,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -185,7 +197,7 @@ module.exports = {
     startedAt,
     finishedAt,
     type,
-    duration
+    duration,
   }) => {
     let validation = new Validator(
       { idTask, name, points, startedAt, finishedAt, type, duration, description },
@@ -197,7 +209,35 @@ module.exports = {
         startedAt: rules.non_required.startedAt,
         finishedAt: rules.non_required.finishedAt,
         type: rules.non_required.type,
-        duration: "intervalFormat"
+        duration: rules.non_required.duration,
+      }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+    validateStartDateFinishDate(startedAt, finishedAt);
+  },
+
+  validateMilestoneInfo: ({ name, idProject, startedAt, finishedAt }) => {
+    let validation = new Validator(
+      { name, idProject, startedAt, finishedAt },
+      {
+        idProject: rules.required.id,
+        name: rules.required.name,
+        startedAt: rules.required.startedAt,
+        finishedAt: rules.required.finishedAt,
+      }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+    validateStartDateFinishDate(startedAt, finishedAt);
+  },
+
+  validateUpdateMilestoneInfo: ({ idMilestone, name, startedAt, finishedAt }) => {
+    let validation = new Validator(
+      { name, idMilestone, startedAt, finishedAt },
+      {
+        idMilestone: rules.required.id,
+        name: rules.non_required.name,
+        startedAt: rules.non_required.startedAt,
+        finishedAt: rules.non_required.finishedAt,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -233,13 +273,13 @@ module.exports = {
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateId: id => {
+  validateId: (id) => {
     let validation = new Validator({ id }, { id: rules.required.id });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateInterval: time => {
+  validateInterval: (time) => {
     let validation = new Validator({ time }, { time: "required|intervalFormat" });
     if (validation.fails()) throw firstError(validation.errors.errors);
-  }
+  },
 };

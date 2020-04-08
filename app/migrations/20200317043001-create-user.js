@@ -8,7 +8,7 @@ module.exports = {
         idUser: {
           type: Sequelize.INTEGER,
           primaryKey: true,
-          autoIncrement: true
+          autoIncrement: true,
         },
         firstName: { type: Sequelize.STRING, allowNull: false },
         lastName: { type: Sequelize.STRING, allowNull: false },
@@ -21,16 +21,16 @@ module.exports = {
           validate: {
             isIn: {
               args: [["Male", "Female", "Not identify"]],
-              msg: "Must be English or Chinese"
-            }
-          }
+              msg: "Must be English or Chinese",
+            },
+          },
         },
         email: { type: Sequelize.STRING, allowNull: true },
         password: { type: Sequelize.STRING, allowNull: true },
         googleId: { type: Sequelize.STRING, allowNull: true },
         facebookId: { type: Sequelize.STRING, allowNull: true },
         is_verified: { type: Sequelize.BOOLEAN, defaultValue: false },
-        updatedAt: { allowNull: false, type: Sequelize.DATE }
+        updatedAt: { allowNull: false, type: Sequelize.DATE },
       })
       .then(async () => {
         try {
@@ -45,8 +45,8 @@ module.exports = {
                 gender: "Not identify",
                 email: "admin@gmail.com",
                 password: hash,
-                is_verified: true
-              }
+                is_verified: true,
+              },
             ]);
           });
         } catch (e) {}
@@ -57,5 +57,5 @@ module.exports = {
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable("Users");
-  }
+  },
 };

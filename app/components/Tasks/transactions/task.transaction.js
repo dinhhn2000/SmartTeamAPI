@@ -3,30 +3,20 @@ const models = require("../../../utils/Models");
 const db = require("../../../utils/DB");
 
 module.exports = {
-  createTask: async taskInfo => {
+  createTask: async (taskInfo) => {
     try {
       // Create new Task
       taskInfo.state = 2; // State 2: Open
       const newTask = await models.TaskModel.create(taskInfo);
       return newTask;
     } catch (e) {
-      console.log(e);
       // Database errors
-      if (e.errors !== undefined) throw e.errors.map(error => error.message);
+      if (e.errors !== undefined) throw e.errors.map((error) => error.message);
       throw e;
     }
-    // BUG (Fix later)
-    /*
-Cannot add transaction to this create method:
-+ The create method sucess
-+ Transaction commited
-+ DB check contrain & throw error
-+ Cannot rollback transaction because it has been commited
-+ Server return error `Transaction cannot be rolled back because it has been finished with state: commit`
-*/
   },
   removeTask: async (idTask, idUser) => {
-    return db.sequelize.transaction(async t => {
+    return db.sequelize.transaction(async (t) => {
       try {
         // Check task
         let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -34,7 +24,7 @@ Cannot add transaction to this create method:
 
         // Check admin
         let isAdmin = await models.ProjectUserModel.findOne({
-          where: { idUser, idRole: 2, idProject: taskRecord.idProject }
+          where: { idUser, idRole: 2, idProject: taskRecord.idProject },
         });
         if (!isAdmin) throw "This account is not the admin in this project";
         else {
@@ -44,13 +34,13 @@ Cannot add transaction to this create method:
         return true;
       } catch (e) {
         // Database errors
-        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        if (e.errors !== undefined) throw e.errors.map((error) => error.message);
         throw e;
       }
     });
   },
   addMember: async (idTask, member, idUser) => {
-    return db.sequelize.transaction(async t => {
+    return db.sequelize.transaction(async (t) => {
       try {
         // Check task
         let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -58,7 +48,7 @@ Cannot add transaction to this create method:
 
         // Check admin
         let isAdmin = await models.ProjectUserModel.findOne({
-          where: { idUser, idRole: 2, idProject: taskRecord.idProject }
+          where: { idUser, idRole: 2, idProject: taskRecord.idProject },
         });
         if (!isAdmin) throw "This account is not the admin in this project";
 
@@ -67,7 +57,7 @@ Cannot add transaction to this create method:
 
         // Check if member is in the project
         let memberRecord = await models.ProjectUserModel.findOne({
-          where: { idUser: member, idProject: taskRecord.idProject }
+          where: { idUser: member, idProject: taskRecord.idProject },
         });
         if (memberRecord) throw `This member not in this project`;
 
@@ -80,13 +70,13 @@ Cannot add transaction to this create method:
         return true;
       } catch (e) {
         // Database errors
-        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        if (e.errors !== undefined) throw e.errors.map((error) => error.message);
         throw e;
       }
     });
   },
   updateMember: async (idTask, member, idUser) => {
-    return db.sequelize.transaction(async t => {
+    return db.sequelize.transaction(async (t) => {
       try {
         // Check task
         let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });
@@ -94,13 +84,13 @@ Cannot add transaction to this create method:
 
         // Check admin
         let isAdmin = await models.ProjectUserModel.findOne({
-          where: { idUser, idRole: 2, idProject: taskRecord.idProject }
+          where: { idUser, idRole: 2, idProject: taskRecord.idProject },
         });
         if (!isAdmin) throw "This account is not the admin in this project";
 
         // Check if member is in the project
         let memberRecord = await models.ProjectUserModel.findOne({
-          where: { idUser: member, idProject: taskRecord.idProject }
+          where: { idUser: member, idProject: taskRecord.idProject },
         });
         if (memberRecord) throw `This member not in this project`;
 
@@ -113,13 +103,13 @@ Cannot add transaction to this create method:
         return true;
       } catch (e) {
         // Database errors
-        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        if (e.errors !== undefined) throw e.errors.map((error) => error.message);
         throw e;
       }
     });
   },
   removeMember: async (idTask, member, idUser) => {
-    return db.sequelize.transaction(async t => {
+    return db.sequelize.transaction(async (t) => {
       try {
         // Check member
         let memberRecord = await models.UserModel.findOne({ where: { idUser: member } });
@@ -131,7 +121,7 @@ Cannot add transaction to this create method:
 
         // Check admin
         let isAdmin = await models.ProjectUserModel.findOne({
-          where: { idUser, idRole: 2, idProject: taskRecord.idProject }
+          where: { idUser, idRole: 2, idProject: taskRecord.idProject },
         });
         if (!isAdmin) throw "This account is not the admin in this project";
 
@@ -147,9 +137,9 @@ Cannot add transaction to this create method:
         return true;
       } catch (e) {
         // Database errors
-        if (e.errors !== undefined) throw e.errors.map(error => error.message);
+        if (e.errors !== undefined) throw e.errors.map((error) => error.message);
         throw e;
       }
     });
-  }
+  },
 };

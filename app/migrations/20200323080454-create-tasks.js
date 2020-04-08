@@ -10,7 +10,7 @@ module.exports = {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       idProject: { allowNull: false, type: Sequelize.INTEGER },
       idUser: { allowNull: false, type: Sequelize.INTEGER },
@@ -26,10 +26,10 @@ module.exports = {
       remainTime: { allowNull: true, type: intervalSequelize.INTERVAL },
       duration: { allowNull: false, type: intervalSequelize.INTERVAL },
       createdAt: { allowNull: false, type: Sequelize.DATE },
-      updatedAt: { allowNull: false, type: Sequelize.DATE }
+      updatedAt: { allowNull: false, type: Sequelize.DATE },
     });
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.dropTable("Tasks");
-  }
+  },
 };

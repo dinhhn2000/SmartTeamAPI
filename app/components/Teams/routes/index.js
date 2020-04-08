@@ -6,7 +6,7 @@ const jwtAuth = require("../../../utils/Middlewares/jwtAuth");
 const TeamController = require("../controllers/");
 
 // MANAGE TEAMS
-
+router.get("/", jwtAuth, TeamController.getTeam);
 router.get("/list", jwtAuth, TeamController.getTeamList);
 router.get("/list-members", jwtAuth, TeamController.getTeamMemberList);
 router.post("/create", jwtAuth, TeamController.createTeam);

@@ -32,115 +32,105 @@ module.exports = {
                   gender: "Not identify",
                   email: "admin@gmail.com",
                   password: hash,
-                  is_verified: true
+                  is_verified: true,
                 });
             } else throw error;
           });
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
       });
       await RoleModel.sync().then(async () => {
         try {
           await RoleModel.findOrCreate({
             where: { idRole: 1 },
-            defaults: { name: "Super Admin" }
+            defaults: { name: "Super Admin" },
           });
           await RoleModel.findOrCreate({
             where: { idRole: 2 },
-            defaults: { name: "Admin" }
+            defaults: { name: "Admin" },
           });
           await RoleModel.findOrCreate({
             where: { idRole: 3 },
-            defaults: { name: "Member" }
+            defaults: { name: "Member" },
           });
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
       });
       await TeamModel.sync();
       await StateModel.sync().then(async () => {
         try {
           await StateModel.findOrCreate({
             where: { idState: 1 },
-            defaults: { name: "Pending" }
+            defaults: { name: "Pending" },
           });
           await StateModel.findOrCreate({
             where: { idState: 2 },
-            defaults: { name: "Open" }
+            defaults: { name: "Open" },
           });
           await StateModel.findOrCreate({
             where: { idState: 3 },
-            defaults: { name: "Work in progress" }
+            defaults: { name: "Work in progress" },
           });
           await StateModel.findOrCreate({
             where: { idState: 4 },
-            defaults: { name: "Closed incompleted" }
+            defaults: { name: "Closed incompleted" },
           });
           await StateModel.findOrCreate({
             where: { idState: 5 },
-            defaults: { name: "Closed completed" }
+            defaults: { name: "Closed completed" },
           });
           await StateModel.findOrCreate({
             where: { idState: 6 },
-            defaults: { name: "Assigned" }
+            defaults: { name: "Assigned" },
           });
           await StateModel.findOrCreate({
             where: { idState: 7 },
-            defaults: { name: "Done" }
+            defaults: { name: "Done" },
           });
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
         // console.log("States table created");
       });
       await PriorityModel.sync().then(async () => {
         try {
           await PriorityModel.findOrCreate({
             where: { idPriority: 1 },
-            defaults: { name: "Low" }
+            defaults: { name: "Low" },
           });
           await PriorityModel.findOrCreate({
             where: { idPriority: 2 },
-            defaults: { name: "Normal" }
+            defaults: { name: "Normal" },
           });
           await PriorityModel.findOrCreate({
             where: { idPriority: 3 },
-            defaults: { name: "Important" }
+            defaults: { name: "Important" },
           });
           await PriorityModel.findOrCreate({
             where: { idPriority: 4 },
-            defaults: { name: "Critical" }
+            defaults: { name: "Critical" },
           });
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
         // console.log("Prioritys table created");
       });
       await ProjectModel.sync();
       await ProjectUserModel.sync();
+      await MilestoneModel.sync();
       await TeamUserModel.sync();
       await OtpModel.sync();
       await TaskTypeModel.sync().then(async () => {
         try {
           await TaskTypeModel.findOrCreate({
             where: { idType: 1 },
-            defaults: { name: "Developing" }
+            defaults: { name: "Developing" },
           });
           await TaskTypeModel.findOrCreate({
             where: { idType: 2 },
-            defaults: { name: "Testing" }
+            defaults: { name: "Testing" },
           });
           await TaskTypeModel.findOrCreate({
             where: { idType: 3 },
-            defaults: { name: "Deployed" }
+            defaults: { name: "Deployed" },
           });
-        } catch (e) {
-          console.log(e);
-        }
+        } catch (e) {}
       });
       await TaskModel.sync();
-      await MilestoneModel.sync();
       await createUserData();
     } catch (e) {
       console.log(e);
@@ -171,8 +161,8 @@ module.exports = {
     "dob",
     "googleId",
     "facebookId",
-    "is_verified"
-  ]
+    "is_verified",
+  ],
 };
 
 const createUserData = async () => {
@@ -191,12 +181,10 @@ const createUserData = async () => {
               gender: "Not identify",
               email: `admin${i}@gmail.com`,
               password: hash,
-              is_verified: true
+              is_verified: true,
             });
         }
       } else throw error;
     });
-  } catch (e) {
-    console.log(e);
-  }
+  } catch (e) {}
 };

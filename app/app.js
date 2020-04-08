@@ -18,6 +18,7 @@ const users = require("./components/Users/routes");
 const projects = require("./components/Projects/routes");
 const teams = require("./components/Teams/routes");
 const tasks = require("./components/Tasks/routes");
+const milestones = require("./components/Milestones/routes");
 
 var app = express();
 
@@ -47,9 +48,10 @@ app.use("/users", users);
 app.use("/projects", projects);
 app.use("/teams", teams);
 app.use("/tasks", tasks);
+app.use("/milestones", milestones);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var err = new Error("Not Found");
   err.status = 404;
   next(err);
@@ -60,22 +62,22 @@ app.use(function(req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get("env") === "development") {
-  app.use(function(err, req, res, next) {
+  app.use(function (err, req, res, next) {
     res.status(err.status || 500);
     res.render("error", {
       message: err.message,
-      error: err
+      error: err,
     });
   });
 }
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   res.status(err.status || 500);
   res.render("error", {
     message: err.message,
-    error: {}
+    error: {},
   });
 });
 
