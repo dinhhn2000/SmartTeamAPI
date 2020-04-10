@@ -5,22 +5,22 @@
     "database": "smartteam",
     "host": "db",
     "dialect": "postgres",
-    "operatorsAliases": false
+    "operatorsAliases": "0"
   },
   "test": {
-    "username": "root",
+    "username": "postgres",
     "password": "123456",
     "database": "smartteam",
-    "host": "127.0.0.1",
+    "host": "localhost",
     "dialect": "postgres",
-    "operatorsAliases": false
+    "operatorsAliases": "0"
   },
   "production": {
-    "username": "root",
+    "username": "postgres",
     "password": "123456",
     "database": "smartteam",
-    "host": "127.0.0.1",
+    "host": "localhost",
     "dialect": "postgres",
-    "operatorsAliases": false
+    "operatorsAliases": "0"
   }
 }

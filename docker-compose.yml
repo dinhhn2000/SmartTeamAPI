@@ -11,6 +11,8 @@ services:
       # DATABASE_URL: postgres://postgres:123456@db:5432/smartteam
   web:
     build: .
+    entrypoint: /entrypoint.sh
+    command: ["./wait-for-it.sh", "db:5432", "--", "/entrypoint.sh"]
     volumes:
       - "./app:/src/app"
     env_file:
