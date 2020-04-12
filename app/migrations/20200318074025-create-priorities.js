@@ -2,13 +2,8 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.createTable("Priorities", {
-      idPriority: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER,
-      },
-      name: { type: Sequelize.STRING },
+      idPriority: { autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
+      name: { allowNull: false, type: Sequelize.STRING },
     });
   },
   down: (queryInterface, Sequelize) => {

@@ -2,13 +2,15 @@
 const response = require("../../../utils/Responses");
 const models = require("../../../utils/Models");
 const validators = require("../../../utils/Validations/validations");
+const helpers = require("../../../utils/Helpers");
 
 module.exports = {
   getMilestone: async (req, res, next) => {
     let { user } = req;
     let idMilestone = req.query.id;
     try {
-      if (idMilestone === undefined || idMilestone === "") throw "Required id (idMilestone)";
+      if (idMilestone === undefined || idMilestone === "")
+        throw "Required id (idMilestone)";
       validators.validateId(idMilestone);
 
       let milestoneInfo = await models.MilestoneModel.findOne({
@@ -65,6 +67,12 @@ module.exports = {
         where: { idUser: user.idUser, idRole: 2, idProject },
       });
       if (!isAdmin) throw "This account is not the admin in this project";
+
+      // Check milestone date
+      if (!helpers.isBeforeOrEqualThan(project.startedAt, req.body.startedAt))
+        throw "startedAt cannot before project's startedAt";
+      if (!helpers.isBeforeOrEqualThan(req.body.finishedAt, project.finishedAt))
+        throw "finishedAt cannot after project's finishedAt";
 
       // Create milestone
       const newMilestone = await models.MilestoneModel.create(req.body);

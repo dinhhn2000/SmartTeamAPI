@@ -13,23 +13,6 @@ const TaskTypeModel = require("../../components/TaskType/models");
 const MilestoneModel = require("../../components/Milestones/models");
 
 module.exports = {
-  sync: async () => {
-    // try {
-    //   await UserModel.sync();
-    //   await RoleModel.sync();
-    //   await TeamModel.sync();
-    //   await StateModel.sync();
-    //   await PriorityModel.sync();
-    //   await ProjectModel.sync();
-    //   await ProjectUserModel.sync();
-    //   await MilestoneModel.sync();
-    //   await TeamUserModel.sync();
-    //   await OtpModel.sync();
-    //   await TaskTypeModel.sync();
-    //   await TaskModel.sync();
-    // } catch (e) {
-    // }
-  },
   associate: () => {
     // TeamUserModel.belongsTo(TeamModel, { foreignKey: "idTeam" });
     // TeamUserModel.belongsTo(UserModel, { foreignKey: "idUser" });

@@ -198,9 +198,22 @@ module.exports = {
     finishedAt,
     type,
     duration,
+    workedTime,
+    remainTime,
   }) => {
     let validation = new Validator(
-      { idTask, name, points, startedAt, finishedAt, type, duration, description },
+      {
+        idTask,
+        name,
+        points,
+        startedAt,
+        finishedAt,
+        type,
+        duration,
+        description,
+        workedTime,
+        remainTime,
+      },
       {
         idTask: rules.required.id,
         name: rules.non_required.name,
@@ -210,6 +223,8 @@ module.exports = {
         finishedAt: rules.non_required.finishedAt,
         type: rules.non_required.type,
         duration: rules.non_required.duration,
+        workedTime: rules.non_required.workedTime,
+        remainTime: rules.non_required.remainTime,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);

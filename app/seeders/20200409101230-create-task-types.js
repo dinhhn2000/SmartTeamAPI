@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.bulkInsert("TaskTypes", [
+    return queryInterface.bulkInsert("TaskType", [
       { idType: 1, name: "Developing" },
       { idType: 2, name: "Testing" },
       { idType: 3, name: "Deployed" },
@@ -10,6 +10,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete("TaskTypes", null, {});
+    return queryInterface.bulkDelete("TaskType", null, {});
   },
 };

@@ -3,3 +3,4 @@
 /app/.sequelizerc
 Dockerfile
 /.vscode
+/app/config

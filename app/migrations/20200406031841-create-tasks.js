@@ -6,14 +6,10 @@ module.exports = {
     const intervalSequelize = withInterval(Sequelize);
 
     return queryInterface.createTable("Tasks", {
-      idTask: {
-        allowNull: false,
-        autoIncrement: true,
-        primaryKey: true,
-        type: Sequelize.INTEGER,
-      },
+      idTask: { autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
       idProject: { allowNull: false, type: Sequelize.INTEGER },
-      idUser: { allowNull: false, type: Sequelize.INTEGER },
+      idUser: { type: Sequelize.INTEGER },
+      idMilestone: { allowNull: false, type: Sequelize.INTEGER },
       name: { allowNull: false, type: Sequelize.STRING },
       description: { type: Sequelize.STRING },
       startedAt: { allowNull: true, type: Sequelize.DATE },

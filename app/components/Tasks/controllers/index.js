@@ -134,6 +134,9 @@ module.exports = {
     // let { idTask, name, description, points, startedAt, finishedAt, type, duration, idMilestone  } = req.body;
     try {
       validators.validateUpdateTaskInfo(req.body);
+      // Remove workedTime & remainTime in req.body if exist
+      req.body.workedTime = undefined;
+      req.body.remainTime = undefined;
 
       // Check task
       let taskRecord = await models.TaskModel.findOne({ where: { idTask }, raw: true });

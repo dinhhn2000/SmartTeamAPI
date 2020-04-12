@@ -15,4 +15,6 @@ module.exports = {
     if (new Date(dateAfter) >= new Date(dateBefore)) return true;
     return false;
   },
+
+  sumArray: (arr) => arr.reduce((a, b) => a + b, 0),
 };

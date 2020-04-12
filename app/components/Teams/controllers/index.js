@@ -11,7 +11,8 @@ module.exports = {
     try {
       if (idTeam === undefined || idTeam === "") throw "Required id (idTeam)";
 
-      let result = await models.TeamModel.findOne({ where: { idTeam } });
+      let result = await models.TeamModel.findOne({ where: { idTeam }, raw: true });
+      if (!result) throw "This team not exist";
       return response.success(res, "Get list of teams success", result);
     } catch (e) {
       return response.error(res, "Get list of teams fail", e);

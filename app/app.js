@@ -38,10 +38,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 app.use(passport.initialize());
 
-// Sync all models
-require("./utils/Models").sync();
-require("./utils/Models").associate();
-
 // Intialize routes
 app.use("/", routes);
 app.use("/users", users);

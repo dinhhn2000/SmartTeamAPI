@@ -13,6 +13,7 @@ module.exports = {
       if (idProject === undefined || idProject === "") throw "Required id (idProject)";
       // Get projects info
       let result = await models.ProjectModel.findAll({ where: { idProject }, raw: true });
+      if (!result) throw "This project not exist";
       return response.success(res, "Get projects success", result);
     } catch (e) {
       return response.error(res, "Get projects fail", e);
@@ -88,8 +89,7 @@ module.exports = {
       });
       if (membersInfo.length > 0)
         return response.success(res, "Get list of members success", membersInfo);
-      else
-        return response.success(res, "Get list of members success", []);
+      else return response.success(res, "Get list of members success", []);
     } catch (e) {
       return response.error(res, "Get list of projects fail", e);
     }
@@ -125,6 +125,86 @@ module.exports = {
         throw `Something wrong when get project's members (Maybe some ghost project with 0 members)`;
     } catch (e) {
       return response.error(res, "Get list of projects fail", e);
+    }
+  },
+  getProjectProgress: async (req, res, next) => {
+    let { user } = req;
+    let idProject = req.query.id;
+    try {
+      if (idProject === undefined || idProject === "") throw "Required id (idProject)";
+
+      // Check project
+      let projectRecord = await models.ProjectModel.findOne({ where: { idProject } });
+      if (!projectRecord) throw "This project not exist";
+
+      // Check project's member
+      let isMember = await models.ProjectUserModel.findOne({
+        where: { idUser: user.idUser, idProject },
+        raw: true,
+      });
+      if (!isMember) throw "This account is not in this project";
+
+      // Get project's progress
+      let tasks = await models.TaskModel.findAll({
+        attributes: ["progress"],
+        where: { idProject },
+        raw: true,
+      });
+      if (tasks.length === 0)
+        return response.success(res, "Get project's progress success", { progress: 0 });
+      if (tasks.length === 1)
+        return response.success(res, "Get project's progress success", {
+          progress: tasks[0].progress,
+        });
+
+      tasks = tasks.map((task) => task.progress);
+      let result = helpers.sumArray(tasks);
+      return response.success(res, "Get project's progress success", {
+        progress: result / tasks.length,
+      });
+    } catch (e) {
+      return response.error(res, "Get project's progress fail", e);
+    }
+  },
+  getProjectWorkedTime: async (req, res, next) => {
+    let { user } = req;
+    let idProject = req.query.id;
+    try {
+      if (idProject === undefined || idProject === "") throw "Required id (idProject)";
+
+      // Check project
+      let projectRecord = await models.ProjectModel.findOne({ where: { idProject } });
+      if (!projectRecord) throw "This project not exist";
+
+      // Check project's member
+      let isMember = await models.ProjectUserModel.findOne({
+        where: { idUser: user.idUser, idProject },
+        raw: true,
+      });
+      if (!isMember) throw "This account is not in this project";
+
+      // Get project's progress
+      let tasks = await models.TaskModel.findAll({
+        attributes: ["workedTime", "duration"],
+        where: { idProject },
+        raw: true,
+      });
+
+      let totalWorkedTime = { hours: 0, minutes: 0 };
+      let totalDuration = { hours: 0, minutes: 0 };
+
+      tasks.forEach((task, index) => {
+        totalWorkedTime.hours = totalWorkedTime.hours + tasks[0].workedTime.hours;
+        totalWorkedTime.minutes = totalWorkedTime.minutes + tasks[0].workedTime.minutes;
+        totalDuration.hours = totalDuration.hours + tasks[0].duration.hours;
+        totalDuration.minutes = totalDuration.minutes + tasks[0].duration.minutes;
+      });
+      return response.success(res, "Get project's progress success", {
+        totalWorkedTime,
+        totalDuration,
+      });
+    } catch (e) {
+      return response.error(res, "Get project's progress fail", e);
     }
   },
   createProject: async (req, res, next) => {
