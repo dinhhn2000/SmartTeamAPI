@@ -297,4 +297,12 @@ module.exports = {
     let validation = new Validator({ time }, { time: "required|intervalFormat" });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
+
+  validatePagination: (pageIndex, limit) => {
+    let validation = new Validator(
+      { pageIndex, limit },
+      { pageIndex: rules.required.pagination, limit: rules.required.pagination }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
 };

@@ -17,4 +17,8 @@ module.exports = {
   },
 
   sumArray: (arr) => arr.reduce((a, b) => a + b, 0),
+
+  listStruture: (currentPage, totalRecords, data, dataName) => {
+    return { currentPage: parseInt(currentPage), totalRecords, [dataName]: data };
+  },
 };

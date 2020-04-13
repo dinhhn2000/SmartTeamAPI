@@ -24,6 +24,7 @@ module.exports = {
     workedTime: "required|intervalFormat",
     remainTime: "required|intervalFormat",
     duration: "required|intervalFormat",
+    pagination: "required|numeric|min:1",
   },
 
   // Non required rules (Use for update)
@@ -50,5 +51,6 @@ module.exports = {
     workedTime: "intervalFormat",
     remainTime: "intervalFormat",
     duration: "intervalFormat",
+    pagination: "numeric|min:1",
   },
 };
