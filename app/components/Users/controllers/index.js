@@ -16,10 +16,10 @@ function getToken(user) {
     idUser: user.idUser,
     firstName: user.firstName,
     lastName: user.lastName,
-    avatar: user.avatar
+    avatar: user.avatar,
   };
   const token = jwt.sign(data, JWT_SECRET, {
-    expiresIn: expireTime + "m"
+    expiresIn: expireTime + "m",
   });
   return token;
 }
@@ -45,7 +45,7 @@ module.exports = {
               lastName,
               email,
               password: hash,
-              avatar: "https://icon-library.net/images/bot-icon/bot-icon-18.jpg"
+              avatar: "https://icon-library.net/images/bot-icon/bot-icon-18.jpg",
             });
             // Send verify to email & create OTP
             const otp = Math.floor(Math.random() * 1000000 + 1);
@@ -53,7 +53,7 @@ module.exports = {
               idUser: user.idUser,
               otp,
               type: 1,
-              email: user.email
+              email: user.email,
             });
             const message = createMessage(email, otp, "Account verification");
             sendEmail(message);
@@ -67,23 +67,16 @@ module.exports = {
     }
   },
   signIn: async (req, res, next) => {
-    passport.authenticate(
-      "local",
-      {
-        session: false
-      },
-      async (err, user, message) => {
-        if (err || !user) {
-          if (typeof message.message !== "undefined") message = message.message;
-          if (!err) return response.error(res, message);
-          else return response.error(res, message, err);
-        }
-        return response.success(res, "Sign in success", {
-          expiresIn: expireTime * 60,
-          accessToken: getToken(user)
-        });
+    passport.authenticate("local", { session: false }, async (err, user, message) => {
+      if (err || !user) {
+        if (!err) return response.error(res, message);
+        else return response.error(res, message, err);
       }
-    )(req, res, next);
+      return response.success(res, "Sign in success", {
+        expiresIn: expireTime * 60,
+        accessToken: getToken(user),
+      });
+    })(req, res, next);
   },
   signInGoogle: async (req, res, next) => {
     try {
@@ -99,10 +92,10 @@ module.exports = {
             if (user !== null) {
               return response.success(res, "Sign in success", {
                 expiresIn: expireTime * 60,
-                accessToken: getToken(user)
+                accessToken: getToken(user),
               });
             } else {
-              throw "Something wrong with google access_token";
+              throw "Something's wrong  with google access_token";
             }
           }
         } catch (e) {
@@ -117,7 +110,7 @@ module.exports = {
     passport.authenticate(
       "facebook",
       {
-        session: false
+        session: false,
       },
       (err, user) => {
         if (err || !user) {
@@ -128,7 +121,7 @@ module.exports = {
         }
         return response.success(res, "Sign in success", {
           expiresIn: expireTime * 60,
-          accessToken: getToken(user)
+          accessToken: getToken(user),
         });
       }
     )(req, res, next);
@@ -141,9 +134,9 @@ module.exports = {
 
       let existedOtp = await models.OtpModel.findOne({
         where: {
-          [Op.and]: [{ otp }, { type: 1 }, { email }]
+          [Op.and]: [{ otp }, { type: 1 }, { email }],
         },
-        raw: true
+        raw: true,
       });
       if (!!existedOtp) {
         validators.validateOtpTime(existedOtp.createdAt);
@@ -152,12 +145,12 @@ module.exports = {
           { where: { idUser: existedOtp.idUser } }
         );
         await models.OtpModel.destroy({
-          where: { idUser: existedOtp.idUser }
+          where: { idUser: existedOtp.idUser },
         });
         return response.success(res, "Account is verified");
       } else throw "OTP is incorrect";
     } catch (e) {
-      return response.error(res, "Something wrong when verify", e);
+      return response.error(res, "Something's wrong  when verify", e);
     }
   },
   verifyAccountResend: async (req, res, next) => {
@@ -166,7 +159,7 @@ module.exports = {
       validators.validateEmail(email);
 
       let user = await models.UserModel.findOne({
-        where: { email }
+        where: { email },
       });
       if (!!user) user = user.dataValues;
       else throw "User not found";
@@ -177,7 +170,7 @@ module.exports = {
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
     } catch (e) {
-      return response.error(res, "Something wrong when create otp", e);
+      return response.error(res, "Something's wrong  when create otp", e);
     }
   },
   changePassword: async (req, res, next) => {
@@ -186,7 +179,7 @@ module.exports = {
       validators.validateEmail(email);
 
       let user = await models.UserModel.findOne({
-        where: { email }
+        where: { email },
       });
       if (!!user) user = user.dataValues;
       else throw "User not found";
@@ -198,7 +191,7 @@ module.exports = {
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
     } catch (e) {
-      return response.error(res, "Something wrong when create otp", e);
+      return response.error(res, "Something's wrong  when create otp", e);
     }
   },
   verifyChangePassword: async (req, res, next) => {
@@ -214,9 +207,9 @@ module.exports = {
 
       let existedOtp = await models.OtpModel.findOne({
         where: {
-          [Op.and]: [{ otp }, { type: 2 }, { idUser: user.idUser }]
+          [Op.and]: [{ otp }, { type: 2 }, { idUser: user.idUser }],
         },
-        raw: true
+        raw: true,
       });
       if (!!existedOtp) {
         validators.validateOtpTime(existedOtp.createdAt);
@@ -228,14 +221,14 @@ module.exports = {
               { where: { idUser: user.idUser } }
             );
             await models.OtpModel.destroy({
-              where: { idUser: existedOtp.idUser }
+              where: { idUser: existedOtp.idUser },
             });
             return response.success(res, "Change password complete");
           }
         });
       } else throw "OTP is incorrect";
     } catch (e) {
-      return response.error(res, "Something wrong when verify", e);
+      return response.error(res, "Something's wrong  when verify", e);
     }
-  }
+  },
 };

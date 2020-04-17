@@ -1,6 +1,7 @@
 "use strict";
-const { DataTypes, Deferrable } = require("sequelize");
+const { DataTypes, Deferrable, Op } = require("sequelize");
 const db = require("../../../utils/DB");
+const helpers = require("../../../utils/Helpers");
 
 const Team = db.sequelize.define(
   "Teams",
@@ -31,4 +32,19 @@ const Team = db.sequelize.define(
   { indexes: [{ unique: true, fields: ["name", "creator"] }] }
 );
 
-module.exports = Team;
+module.exports = {
+  Team,
+  findByIdTeamList: async (idList, query) => {
+    let filter = { where: { idTeam: { [Op.in]: idList } } };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Team.findAndCountAll(paginationQuery.query),
+        "teams"
+      );
+    else return Team.findAll(paginationQuery.query);
+  },
+};

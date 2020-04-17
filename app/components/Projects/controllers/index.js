@@ -21,9 +21,8 @@ module.exports = {
   },
   getProjectList: async (req, res, next) => {
     let { user } = req;
-    let { limit, pageIndex } = req.query;
     try {
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       // Get projects id
       let projectListIndex = await models.ProjectUserModel.findAll({
@@ -36,17 +35,12 @@ module.exports = {
       projectListIndex = projectListIndex.map((e) => e.idProject);
 
       // Get projects info
-      let projectList = await models.ProjectModel.findAndCountAll({
-        where: { idProject: { [Op.in]: projectListIndex } },
-        offset: (pageIndex - 1) * limit,
-        limit,
-        raw: true,
-      });
-      return response.success(
-        res,
-        "Get list of projects success",
-        helpers.listStruture(pageIndex, projectList.count, projectList.rows, "projects")
+      let projectList = await models.ProjectModelHelpers.findByIdProjectList(
+        projectListIndex,
+        req.query
       );
+
+      return response.success(res, "Get list of projects success", projectList);
     } catch (e) {
       return response.error(res, "Get list of projects fail", e);
     }
@@ -54,10 +48,9 @@ module.exports = {
   getProjectNotMemberList: async (req, res, next) => {
     let { user } = req;
     let idProject = req.query.id;
-    let { limit, pageIndex } = req.query;
     try {
       if (idProject === undefined || idProject === "") throw "Required id (idProject)";
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       // Get projects' members id
       let memberInProject = await models.ProjectUserModel.findAll({
@@ -81,27 +74,20 @@ module.exports = {
       let { idTeam } = projectInfo;
 
       // Get all team's members & not in project
-      let memberNotInProject = await models.TeamUserModel.findAndCountAll({
+      let memberNotInProject = await models.TeamUserModel.findAll({
+        attributes: ["idUser"],
         where: { idTeam, idUser: { [Op.notIn]: memberInProject } },
-        offset: (pageIndex - 1) * limit,
-        limit,
         raw: true,
       });
-      let total = memberNotInProject.count;
-      memberNotInProject = memberNotInProject.rows.map((member) => member.idUser);
+      memberNotInProject = memberNotInProject.mao((member) => member.idUser);
 
       // Get members' info
-      let membersInfo = await models.UserModel.findAll({
-        attributes: { exclude: models.excludeFieldsForUserInfo },
-        where: { idUser: { [Op.in]: memberNotInProject } },
-        raw: true,
-      });
-
-      return response.success(
-        res,
-        "Get list of members success",
-        helpers.listStruture(pageIndex, total, membersInfo, "members")
+      let membersInfo = await models.UserModelHelpers.findByIdUserList(
+        memberNotInProject,
+        req.query
       );
+
+      return response.success(res, "Get list of members success", membersInfo);
     } catch (e) {
       return response.error(res, "Get list of projects fail", e);
     }
@@ -109,10 +95,9 @@ module.exports = {
   getProjectMemberList: async (req, res, next) => {
     let { user } = req;
     let idProject = req.query.id;
-    let { limit, pageIndex } = req.query;
     try {
       if (idProject === undefined || idProject === "") throw "Required id (idProject)";
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       // Get projects' members id
       let membersId = await models.ProjectUserModel.findAll({
@@ -120,30 +105,19 @@ module.exports = {
         where: { idProject },
         raw: true,
       });
-      if (membersId.length === 0) throw "This project is not exist";
+      if (membersId.length === 0)
+        throw "Something's wrong when getting project's members (Maybe some ghost projects with 0 members)";
 
       // Check is in the project
       membersId = membersId.map((e) => e.idUser);
       if (!membersId.includes(user.idUser)) throw "This account is not in this project";
 
       // Get members' info
-      let membersInfo = await models.UserModel.findAndCountAll({
-        attributes: {
-          exclude: models.excludeFieldsForUserInfo,
-        },
-        where: { idUser: { [Op.in]: membersId } },
-        offset: (pageIndex - 1) * limit,
-        limit,
-        raw: true,
-      });
-      if (membersInfo.rows.length > 0)
-        return response.success(
-          res,
-          "Get list of members success",
-          helpers.listStruture(pageIndex, membersInfo.count, membersInfo.rows, "members")
-        );
-      else
-        throw `Something wrong when get project's members (Maybe some ghost project with 0 members)`;
+      let membersInfo = await models.UserModelHelpers.findByIdUserList(
+        membersId,
+        req.query
+      );
+      return response.success(res, "Get list of members success", membersInfo);
     } catch (e) {
       return response.error(res, "Get list of projects fail", e);
     }

@@ -2,6 +2,7 @@
 const { DataTypes, Deferrable } = require("sequelize");
 const withInterval = require("sequelize-interval-postgres");
 const db = require("../../../utils/DB");
+const helpers = require("../../../utils/Helpers");
 
 const intervalDataTypes = withInterval(DataTypes);
 
@@ -71,4 +72,36 @@ const Task = db.sequelize.define("Tasks", {
   },
 });
 
-module.exports = Task;
+module.exports = {
+  Task,
+  findByTime: async (query) => {
+    const filter = {
+      where: {
+        idProject: query.idProject,
+        startedAt: { [Op.gte]: query.startedAt },
+        finishedAt: { [Op.lte]: query.finishedAt },
+      },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Task.findAndCountAll(paginationQuery.query),
+        "tasks"
+      );
+    else return Task.findAll(paginationQuery.query);
+  },
+  findByIdProject: async (idProject, query) => {
+    const filter = { where: { idProject } };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Task.findAndCountAll(paginationQuery.query),
+        "tasks"
+      );
+    else return Task.findAll(paginationQuery.query);
+  },
+};

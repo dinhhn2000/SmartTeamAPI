@@ -18,7 +18,26 @@ module.exports = {
 
   sumArray: (arr) => arr.reduce((a, b) => a + b, 0),
 
-  listStruture: (currentPage, totalRecords, data, dataName) => {
-    return { currentPage: parseInt(currentPage), totalRecords, [dataName]: data };
+  paginationQuery: (filter, query) => {
+    if (query.pageIndex !== undefined && query.limit !== undefined)
+      return {
+        hasPagination: true,
+        pageIndex: query.pageIndex,
+        query: {
+          ...filter,
+          raw: true,
+          offset: (query.pageIndex - 1) * query.limit,
+          limit: query.limit,
+        },
+      };
+    else return { hasPagination: false, query: { ...filter, raw: true } };
+  },
+
+  listStructure: (currentPage, data, dataName) => {
+    return {
+      currentPage: parseInt(currentPage),
+      totalRecords: data.count,
+      [dataName]: data.rows,
+    };
   },
 };

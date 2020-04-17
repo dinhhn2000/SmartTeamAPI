@@ -1,7 +1,8 @@
 "use strict";
 
-const { DataTypes, Deferrable } = require("sequelize");
+const { DataTypes, Deferrable, Op } = require("sequelize");
 const db = require("../../../utils/DB");
+const helpers = require("../../../utils/Helpers");
 
 const Milestone = db.sequelize.define("Milestones", {
   idMilestone: {
@@ -24,4 +25,17 @@ const Milestone = db.sequelize.define("Milestones", {
   finishedAt: { allowNull: false, type: DataTypes.DATE },
 });
 
-module.exports = Milestone;
+module.exports = {
+  Milestone,
+  findByIdProject: async (idProject, query) => {
+    let filter = { where: { idProject } };
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Milestone.findAndCountAll(paginationQuery.query),
+        "milestones"
+      );
+    else return Milestone.findAll(paginationQuery.query);
+  },
+};

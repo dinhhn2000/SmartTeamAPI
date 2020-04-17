@@ -33,10 +33,9 @@ module.exports = {
   getMilestoneList: async (req, res, next) => {
     let { user } = req;
     let idProject = req.query.id;
-    let { limit, pageIndex } = req.query;
     try {
       if (idProject === undefined || idProject === "") throw "Required id (idProject)";
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       // Check is in project
       let isInProject = await models.ProjectUserModel.findOne({
@@ -44,23 +43,12 @@ module.exports = {
       });
       if (!isInProject) throw "This account is not in this project";
 
-      let milestoneList = await models.MilestoneModel.findAndCountAll({
-        where: { idProject },
-        offset: (pageIndex - 1) * limit,
-        limit,
-        raw: true,List
-      });
-
-      return response.success(
-        res,
-        "Get list of milestones success",
-        helpers.listStruture(
-          pageIndex,
-          milestoneList.count,
-          milestoneList.rows,
-          "milestones"
-        )
+      let milestoneList = await models.MilestoneModelHelpers.findByIdProject(
+        idProject,
+        req.query
       );
+
+      return response.success(res, "Get list of milestones success", milestoneList);
     } catch (e) {
       return response.error(res, "Get list of milestones fail", e);
     }

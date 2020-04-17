@@ -21,32 +21,26 @@ module.exports = {
   },
   getTeamList: async (req, res, next) => {
     let { user } = req;
-    let { limit, pageIndex } = req.query;
     try {
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       let teamUserRecords = await models.TeamUserModel.findAll({
         where: { idUser: user.idUser },
         raw: true,
       });
       let teamListIndex = teamUserRecords.map((record) => record.idTeam);
-      let teamList = await models.TeamModel.findAndCountAll({
-        where: { idTeam: { [Op.in]: teamListIndex } },
-        offset: (pageIndex - 1) * limit,
-        limit,
-        raw: true,
-      });
-      teamList.rows = teamList.rows.map((team) => {
-        let index = teamListIndex.indexOf(team.idTeam);
-        team.idRole = teamUserRecords[index].idRole;
-        return team;
-      });
-
-      return response.success(
-        res,
-        "Get list of teams success",
-        helpers.listStruture(pageIndex, teamList.count, teamList.rows, "teams")
+      let teamList = await models.TeamModelHelpers.findByIdTeamList(
+        teamListIndex,
+        req.query
       );
+      if (req.query.pageIndex !== undefined && req.query.limit !== undefined)
+        teamList.teams = teamList.teams.map((team) => {
+          let index = teamListIndex.indexOf(team.idTeam);
+          team.idRole = teamUserRecords[index].idRole;
+          return team;
+        });
+
+      return response.success(res, "Get list of teams success", teamList);
     } catch (e) {
       return response.error(res, "Get list of teams fail", e);
     }
@@ -54,10 +48,9 @@ module.exports = {
   getTeamMemberList: async (req, res, next) => {
     let { user } = req;
     let idTeam = req.query.id;
-    let { limit, pageIndex } = req.query;
     try {
       if (idTeam === undefined || idTeam === "") throw "Required id (idTeam)";
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       let membersId = await models.TeamUserModel.findAll({
         attributes: ["idUser"],
@@ -67,19 +60,11 @@ module.exports = {
       if (membersId.length === 0) throw "This team is not exist";
       membersId = membersId.map((e) => e.idUser);
       if (!membersId.includes(user.idUser)) throw "This account is not in this team";
-      let membersInfo = await models.UserModel.findAndCountAll({
-        attributes: {
-          exclude: models.excludeFieldsForUserInfo,
-        },
-        where: { idUser: { [Op.in]: membersId } },
-        offset: (pageIndex - 1) * limit,
-        limit,
-      });
-      return response.success(
-        res,
-        "Get list of members success",
-        helpers.listStruture(pageIndex, membersInfo.count, membersInfo.rows, "members")
+      let membersInfo = await models.UserModelHelpers.findByIdUserList(
+        membersId,
+        req.query
       );
+      return response.success(res, "Get list of members success", membersInfo);
     } catch (e) {
       return response.error(res, "Get list of team's member fail", e);
     }

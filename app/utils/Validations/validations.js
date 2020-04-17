@@ -30,6 +30,14 @@ Validator.register(
 );
 
 module.exports = {
+  customValidate: (input, inputName, ruleName) => {
+    let validation = new Validator(
+      { [inputName]: input },
+      { [inputName]: rules.required[ruleName] }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
   validateEmail: (email) => {
     let validation = new Validator({ email }, { email: rules.required.email });
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -298,11 +306,20 @@ module.exports = {
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validatePagination: (pageIndex, limit) => {
+  validatePagination: ({ pageIndex, limit }) => {
     let validation = new Validator(
       { pageIndex, limit },
-      { pageIndex: rules.required.pagination, limit: rules.required.pagination }
+      { pageIndex: rules.non_required.pagination, limit: rules.non_required.pagination }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
+  validateStartFinish: (startedAt, finishedAt) => {
+    let validation = new Validator(
+      { startedAt, finishedAt },
+      { startedAt: rules.required.startedAt, finishedAt: rules.required.finishedAt }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+    validateStartDateFinishDate(startedAt, finishedAt);
   },
 };

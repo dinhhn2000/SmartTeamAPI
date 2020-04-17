@@ -30,10 +30,9 @@ module.exports = {
   getTaskList: async (req, res, next) => {
     let { user } = req;
     let idProject = req.query.id;
-    let { limit, pageIndex } = req.query;
     try {
       if (idProject === undefined || idProject === "") throw "Required id (idProject)";
-      validators.validatePagination(pageIndex, limit);
+      validators.validatePagination(req.query);
 
       // Check is in project
       let isInProject = await models.ProjectUserModel.findOne({
@@ -41,22 +40,9 @@ module.exports = {
       });
       if (!isInProject) throw "This project not exist";
 
-      let taskList = await models.TaskModel.findAndCountAll({
-        where: { idProject },
-        offset: (pageIndex - 1) * limit,
-        limit,
-        raw: true,
-      });
-      return response.success(
-        res,
-        "Get list of tasks success",
-        helpers.listStruture(
-          pageIndex,
-          taskList.count,
-          taskList.rows,
-          "tasks"
-        )
-      );
+      let taskList = await models.TaskModelHelpers.findByIdProject(idProject, req.query);
+
+      return response.success(res, "Get list of tasks success", taskList);
     } catch (e) {
       return response.error(res, "Get list of tasks fail", e);
     }

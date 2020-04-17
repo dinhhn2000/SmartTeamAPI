@@ -49,7 +49,7 @@ module.exports = {
 
       return response.success(res, "Update profile success");
     } catch (e) {
-      return response.error(res, "Something wrong when update profile", e);
+      return response.error(res, "Something's wrong  when update profile", e);
     }
   },
   updateAvatar: async (req, res, next) => {
@@ -65,7 +65,7 @@ module.exports = {
 
       return response.success(res, "Update avatar success", uploadResult.url);
     } catch (e) {
-      return response.error(res, "Something wrong when update avatar", e);
+      return response.error(res, "Something's wrong  when update avatar", e);
     }
   }
   // setRole: async (req, res, next) => {

@@ -1,6 +1,7 @@
 "use strict";
-const { DataTypes, Deferrable } = require("sequelize");
+const { DataTypes, Deferrable, Op } = require("sequelize");
 const db = require("../../../utils/DB");
+const helpers = require("../../../utils/Helpers");
 
 const Project = db.sequelize.define(
   "Projects",
@@ -8,15 +9,15 @@ const Project = db.sequelize.define(
     idProject: {
       autoIncrement: true,
       primaryKey: true,
-      type: DataTypes.INTEGER
+      type: DataTypes.INTEGER,
     },
     name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     short_name: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
     },
     idTeam: {
       type: DataTypes.INTEGER,
@@ -24,12 +25,12 @@ const Project = db.sequelize.define(
       references: {
         model: "Teams",
         key: "idTeam",
-        deferrable: Deferrable.INITIALLY_DEFERRED
-      }
+        deferrable: Deferrable.INITIALLY_DEFERRED,
+      },
     },
     description: {
       type: DataTypes.STRING,
-      allowNull: true
+      allowNull: true,
     },
     state: {
       type: DataTypes.INTEGER,
@@ -37,8 +38,8 @@ const Project = db.sequelize.define(
       references: {
         model: "States",
         key: "idState",
-        deferrable: Deferrable.INITIALLY_DEFERRED
-      }
+        deferrable: Deferrable.INITIALLY_DEFERRED,
+      },
     },
     priority: {
       allowNull: false,
@@ -46,19 +47,51 @@ const Project = db.sequelize.define(
       references: {
         model: "Priorities",
         key: "idPriority",
-        deferrable: Deferrable.INITIALLY_DEFERRED
-      }
+        deferrable: Deferrable.INITIALLY_DEFERRED,
+      },
     },
     startedAt: {
       allowNull: false,
-      type: DataTypes.DATE
+      type: DataTypes.DATE,
     },
     finishedAt: {
       allowNull: true,
-      type: DataTypes.DATE
-    }
+      type: DataTypes.DATE,
+    },
   },
   { indexes: [{ unique: true, fields: ["name", "idTeam"] }] }
 );
 
-module.exports = Project;
+module.exports = {
+  Project,
+  findByTime: async (query) => {
+    const filter = {
+      where: {
+        idProject: query.idProject,
+        startedAt: { [Op.gte]: query.startedAt },
+        finishedAt: { [Op.lte]: query.finishedAt },
+      },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Project.findAndCountAll(paginationQuery.query),
+        "projects"
+      );
+    else return Project.findAll(paginationQuery.query);
+  },
+  findByIdProjectList: async (idList, query) => {
+    const filter = { where: { idProject: { [Op.in]: idList } } };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Project.findAndCountAll(paginationQuery.query),
+        "projects"
+      );
+    else return Project.findAll(paginationQuery.query);
+  },
+};
