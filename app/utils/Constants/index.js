@@ -15,5 +15,5 @@ module.exports = {
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinaryKey: process.env.CLOUDINARY_API_KEY,
-  cloudinarySecret: process.env.CLOUDINARY_API_SECRET
+  cloudinarySecret: process.env.CLOUDINARY_API_SECRET,
 };

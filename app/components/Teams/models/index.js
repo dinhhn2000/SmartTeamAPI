@@ -35,7 +35,20 @@ const Team = db.sequelize.define(
 module.exports = {
   Team,
   findByIdTeamList: async (idList, query) => {
-    let filter = { where: { idTeam: { [Op.in]: idList } } };
+    const filter = { where: { idTeam: { [Op.in]: idList }, ...query } };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Team.findAndCountAll(paginationQuery.query),
+        "teams"
+      );
+    else return Team.findAll(paginationQuery.query);
+  },
+  findByEmail: async (email, query) => {
+    const filter = { where: { idTeam: { [Op.in]: idList }, ...query } };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
 

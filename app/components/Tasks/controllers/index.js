@@ -289,7 +289,7 @@ module.exports = {
         throw "This account is not assigned for this task";
 
       await models.TaskModel.update(
-        { workedTime: "00:00", remainTime: taskRecord.duration, progress: 0 },
+        { workedTime: "00:00", remainTime: taskRecord.duration, progress: 0, state: 3 },
         { where: { idTask }, raw: true }
       );
       return response.accepted(res, "Start working task success");
@@ -313,7 +313,7 @@ module.exports = {
         throw "This account is not assigned for this task";
 
       await models.TaskModel.update(
-        { workedTime, remainTime: "", progress: 100 },
+        { workedTime, remainTime: "", progress: 100, state: 7 },
         { where: { idTask }, raw: true }
       );
       return response.accepted(res, "End task success");

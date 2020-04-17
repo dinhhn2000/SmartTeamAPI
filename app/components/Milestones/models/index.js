@@ -28,7 +28,7 @@ const Milestone = db.sequelize.define("Milestones", {
 module.exports = {
   Milestone,
   findByIdProject: async (idProject, query) => {
-    let filter = { where: { idProject } };
+    const filter = { where: { idProject, ...query } };
     let paginationQuery = helpers.paginationQuery(filter, query);
     if (paginationQuery.hasPagination)
       return helpers.listStructure(
@@ -37,5 +37,24 @@ module.exports = {
         "milestones"
       );
     else return Milestone.findAll(paginationQuery.query);
+  },
+  findByTime: async (idProject, from, to, query) => {
+    const filter = {
+      where: {
+        idProject,
+        finishedAt: { [Op.gte]: from },
+        startedAt: { [Op.lte]: to },
+        ...query,
+      },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Task.findAndCountAll(paginationQuery.query),
+        "milestones"
+      );
+    else return Task.findAll(paginationQuery.query);
   },
 };

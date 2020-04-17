@@ -41,9 +41,44 @@ module.exports = {
   User,
   excludeFieldsForUserInfo,
   findByIdUserList: async (idList, query) => {
-    let filter = {
+    const filter = {
       attributes: { exclude: excludeFieldsForUserInfo },
-      where: { idUser: { [Op.in]: idList } },
+      where: { idUser: { [Op.in]: idList }, ...query },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await User.findAndCountAll(paginationQuery.query),
+        "users"
+      );
+    else return User.findAll(paginationQuery.query);
+  },
+  findByEmailAndIdUserList: async (idList, email, query) => {
+    const filter = {
+      attributes: { exclude: excludeFieldsForUserInfo },
+      where: { idUser: { [Op.in]: idList }, email: { [Op.substring]: email }, ...query },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await User.findAndCountAll(paginationQuery.query),
+        "users"
+      );
+    else return User.findAll(paginationQuery.query);
+  },
+  findByNameAndIdUserList: async (idList, name, query) => {
+    const filter = {
+      attributes: { exclude: excludeFieldsForUserInfo },
+      where: {
+        idUser: { [Op.in]: idList },
+        firstName: { [Op.substring]: name },
+        lastName: { [Op.substring]: name },
+        ...query,
+      },
     };
 
     let paginationQuery = helpers.paginationQuery(filter, query);

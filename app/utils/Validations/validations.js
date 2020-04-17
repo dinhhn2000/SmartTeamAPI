@@ -106,8 +106,8 @@ module.exports = {
         description: rules.non_required.description,
         priority: rules.required.priority,
         idTeam: rules.required.idTeam,
-        finishedAt: rules.non_required.finishedAt,
-        startedAt: rules.required.startedAt,
+        finishedAt: rules.non_required.date,
+        startedAt: rules.required.date,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -131,8 +131,8 @@ module.exports = {
         description: rules.non_required.description,
         priority: rules.non_required.priority,
         state: rules.non_required.state,
-        startedAt: rules.non_required.startedAt,
-        finishedAt: rules.non_required.finishedAt,
+        startedAt: rules.non_required.date,
+        finishedAt: rules.non_required.date,
         idProject: rules.required.id,
       }
     );
@@ -172,8 +172,8 @@ module.exports = {
         name: rules.required.name,
         description: rules.non_required.description,
         points: rules.required.points,
-        startedAt: rules.non_required.startedAt,
-        finishedAt: rules.non_required.finishedAt,
+        startedAt: rules.non_required.date,
+        finishedAt: rules.non_required.date,
         type: rules.required.type,
         duration: rules.required.duration,
         idProject: rules.required.id,
@@ -227,8 +227,8 @@ module.exports = {
         name: rules.non_required.name,
         description: rules.non_required.description,
         points: rules.non_required.points,
-        startedAt: rules.non_required.startedAt,
-        finishedAt: rules.non_required.finishedAt,
+        startedAt: rules.non_required.date,
+        finishedAt: rules.non_required.date,
         type: rules.non_required.type,
         duration: rules.non_required.duration,
         workedTime: rules.non_required.workedTime,
@@ -245,8 +245,8 @@ module.exports = {
       {
         idProject: rules.required.id,
         name: rules.required.name,
-        startedAt: rules.required.startedAt,
-        finishedAt: rules.required.finishedAt,
+        startedAt: rules.required.date,
+        finishedAt: rules.required.date,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -259,8 +259,8 @@ module.exports = {
       {
         idMilestone: rules.required.id,
         name: rules.non_required.name,
-        startedAt: rules.non_required.startedAt,
-        finishedAt: rules.non_required.finishedAt,
+        startedAt: rules.non_required.date,
+        finishedAt: rules.non_required.date,
       }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
@@ -314,12 +314,12 @@ module.exports = {
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
-  validateStartFinish: (startedAt, finishedAt) => {
+  validateStartFinish: (from, to) => {
     let validation = new Validator(
-      { startedAt, finishedAt },
-      { startedAt: rules.required.startedAt, finishedAt: rules.required.finishedAt }
+      { from, to },
+      { from: rules.required.date, to: rules.required.date }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
-    validateStartDateFinishDate(startedAt, finishedAt);
+    validateStartDateFinishDate(from, to);
   },
 };

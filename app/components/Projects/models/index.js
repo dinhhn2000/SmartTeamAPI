@@ -64,12 +64,50 @@ const Project = db.sequelize.define(
 
 module.exports = {
   Project,
-  findByTime: async (query) => {
+  findByTimeAndIdProjectList: async (idList, from, to, query) => {
     const filter = {
       where: {
-        idProject: query.idProject,
-        startedAt: { [Op.gte]: query.startedAt },
-        finishedAt: { [Op.lte]: query.finishedAt },
+        idProject: { [Op.in]: idList },
+        finishedAt: { [Op.gte]: from },
+        startedAt: { [Op.lte]: to },
+        ...query,
+      },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Project.findAndCountAll(paginationQuery.query),
+        "projects"
+      );
+    else return Project.findAll(paginationQuery.query);
+  },
+  findByDueDayAndIdProjectList: async (idList, from, to, query) => {
+    const filter = {
+      where: {
+        idProject: { [Op.in]: idList },
+        finishedAt: { [Op.gte]: from },
+        finishedAt: { [Op.lte]: to },
+        ...query,
+      },
+    };
+
+    let paginationQuery = helpers.paginationQuery(filter, query);
+    if (paginationQuery.hasPagination)
+      return helpers.listStructure(
+        paginationQuery.pageIndex,
+        await Project.findAndCountAll(paginationQuery.query),
+        "projects"
+      );
+    else return Project.findAll(paginationQuery.query);
+  },
+  findByPriorityAndIdProjectList: async (idList, min, max, query) => {
+    const filter = {
+      where: {
+        idProject: { [Op.in]: idList },
+        priority: { [Op.between]: [min, max] },
+        ...query,
       },
     };
 
@@ -83,7 +121,7 @@ module.exports = {
     else return Project.findAll(paginationQuery.query);
   },
   findByIdProjectList: async (idList, query) => {
-    const filter = { where: { idProject: { [Op.in]: idList } } };
+    const filter = { where: { idProject: { [Op.in]: idList }, ...query } };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
     if (paginationQuery.hasPagination)
