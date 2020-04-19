@@ -19,6 +19,13 @@ module.exports = {
   sumArray: (arr) => arr.reduce((a, b) => a + b, 0),
 
   paginationQuery: (filter, query) => {
+    // Handle custom filter in query
+    filter.where = { ...filter.where, ...query };
+
+    // Remove paginative property in filter
+    delete filter.where.pageIndex;
+    delete filter.where.limit;
+
     if (query.pageIndex !== undefined && query.limit !== undefined)
       return {
         hasPagination: true,

@@ -70,7 +70,6 @@ module.exports = {
         idProject: { [Op.in]: idList },
         finishedAt: { [Op.gte]: from },
         startedAt: { [Op.lte]: to },
-        ...query,
       },
     };
 
@@ -89,7 +88,6 @@ module.exports = {
         idProject: { [Op.in]: idList },
         finishedAt: { [Op.gte]: from },
         finishedAt: { [Op.lte]: to },
-        ...query,
       },
     };
 
@@ -107,7 +105,6 @@ module.exports = {
       where: {
         idProject: { [Op.in]: idList },
         priority: { [Op.between]: [min, max] },
-        ...query,
       },
     };
 
@@ -121,7 +118,7 @@ module.exports = {
     else return Project.findAll(paginationQuery.query);
   },
   findByIdProjectList: async (idList, query) => {
-    const filter = { where: { idProject: { [Op.in]: idList }, ...query } };
+    const filter = { where: { idProject: { [Op.in]: idList } } };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
     if (paginationQuery.hasPagination)

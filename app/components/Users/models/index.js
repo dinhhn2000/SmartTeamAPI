@@ -43,7 +43,7 @@ module.exports = {
   findByIdUserList: async (idList, query) => {
     const filter = {
       attributes: { exclude: excludeFieldsForUserInfo },
-      where: { idUser: { [Op.in]: idList }, ...query },
+      where: { idUser: { [Op.in]: idList } },
     };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
@@ -58,7 +58,7 @@ module.exports = {
   findByEmailAndIdUserList: async (idList, email, query) => {
     const filter = {
       attributes: { exclude: excludeFieldsForUserInfo },
-      where: { idUser: { [Op.in]: idList }, email: { [Op.substring]: email }, ...query },
+      where: { idUser: { [Op.in]: idList }, email: { [Op.substring]: email } },
     };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
@@ -77,7 +77,6 @@ module.exports = {
         idUser: { [Op.in]: idList },
         firstName: { [Op.substring]: name },
         lastName: { [Op.substring]: name },
-        ...query,
       },
     };
 

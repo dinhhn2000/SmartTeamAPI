@@ -80,7 +80,6 @@ module.exports = {
         idProject,
         finishedAt: { [Op.gte]: from },
         startedAt: { [Op.lte]: to },
-        ...query,
       },
     };
 
@@ -99,7 +98,6 @@ module.exports = {
         idProject,
         finishedAt: { [Op.gte]: from },
         finishedAt: { [Op.lte]: to },
-        ...query,
       },
     };
 
@@ -113,7 +111,7 @@ module.exports = {
     else return Task.findAll(paginationQuery.query);
   },
   findByIdProject: async (idProject, query) => {
-    const filter = { where: { idProject, ...query } };
+    const filter = { where: { idProject } };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
     if (paginationQuery.hasPagination)
@@ -125,7 +123,7 @@ module.exports = {
     else return Task.findAll(paginationQuery.query);
   },
   findByIdMilestone: async (idMilestone, query) => {
-    const filter = { where: { idMilestone, ...query } };
+    const filter = { where: { idMilestone } };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
     if (paginationQuery.hasPagination)
@@ -137,7 +135,7 @@ module.exports = {
     else return Task.findAll(paginationQuery.query);
   },
   findByIdMilestoneAndIdUser: async (idMilestone, idUser, query) => {
-    const filter = { where: { idMilestone, idUser, ...query } };
+    const filter = { where: { idMilestone, idUser } };
 
     let paginationQuery = helpers.paginationQuery(filter, query);
     if (paginationQuery.hasPagination)
