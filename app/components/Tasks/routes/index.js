@@ -12,11 +12,11 @@ router.get("/list-members", jwtAuth, TaskController.getTaskMember);
 router.post("/create", jwtAuth, TaskController.createTask);
 router.put("/update", jwtAuth, TaskController.updateTask);
 router.put("/update-progress", jwtAuth, TaskController.updateProgressTask);
-router.put("/set-start", jwtAuth, TaskController.startTask);
-router.put("/set-done", jwtAuth, TaskController.endTask);
+router.put("/start", jwtAuth, TaskController.startTask);
+router.put("/done", jwtAuth, TaskController.endTask);
 router.delete("/remove", jwtAuth, TaskController.removeTask);
 router.post("/add-members", jwtAuth, TaskController.addMember);
-router.post("/update-members", jwtAuth, TaskController.updateMember);
+router.put("/update-members", jwtAuth, TaskController.updateMember);
 router.delete("/remove-members", jwtAuth, TaskController.removeMember);
 
 module.exports = router;

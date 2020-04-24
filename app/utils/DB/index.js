@@ -1,20 +1,12 @@
 "use strict";
 const constants = require("../Constants");
 const Sequelize = require("sequelize");
-const sequelize = new Sequelize(
-  constants.dbName,
-  constants.dbUserName,
-  constants.dbPassword,
-  {
-    host: constants.dbHost,
-    dialect: "postgres",
-    logging: false,
-    freezeTableName: true,
-    // define: {
-    //   timestamps: true
-    // }
-  }
-);
+const sequelize = new Sequelize(constants.dbName, constants.dbUserName, constants.dbPassword, {
+  host: constants.dbHost,
+  dialect: "postgres",
+  logging: false,
+  freezeTableName: true,
+});
 var db = {};
 
 async function authenticate() {

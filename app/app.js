@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const favicon = require("serve-favicon");
+// const favicon = require("serve-favicon");
 const logger = require("morgan");
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
@@ -19,6 +19,7 @@ const projects = require("./components/Projects/routes");
 const teams = require("./components/Teams/routes");
 const tasks = require("./components/Tasks/routes");
 const milestones = require("./components/Milestones/routes");
+const search = require("./components/Search/routes");
 
 var app = express();
 
@@ -45,6 +46,12 @@ app.use("/projects", projects);
 app.use("/teams", teams);
 app.use("/tasks", tasks);
 app.use("/milestones", milestones);
+app.use("/search", search);
+
+// Auto run daily check
+let autoJobs = require("./utils/AutoTasks");
+autoJobs.autoSendOverdueTaskEmail();
+autoJobs.autoSendWarningDueTaskEmail();
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

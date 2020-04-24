@@ -28,8 +28,4 @@ router.get("/user-by-email", jwtAuth, SearchController.searchUserByEmail);
 router.get("/user-by-name-team", jwtAuth, SearchController.searchUserByNameInTeam);
 router.get("/user-by-name-project", jwtAuth, SearchController.searchUserByNameInProject);
 
-// router.get("/list-members", jwtAuth, SearchController.searchProjectMemberList);
-// router.get("/progress", jwtAuth, SearchController.searchProjectProgress);
-// router.get("/worked-time", jwtAuth, SearchController.searchProjectWorkedTime);
-
 module.exports = router;

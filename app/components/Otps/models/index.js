@@ -2,7 +2,7 @@
 const { DataTypes } = require("sequelize");
 const db = require("../../../utils/DB");
 
-const Otp = db.sequelize.define("OTP", {
+const Otp = db.sequelize.define("Otps", {
   idUser: {
     type: DataTypes.INTEGER,
     primaryKey: true

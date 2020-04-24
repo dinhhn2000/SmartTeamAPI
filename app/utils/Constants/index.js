@@ -16,4 +16,19 @@ module.exports = {
   cloudinaryName: process.env.CLOUDINARY_CLOUD_NAME,
   cloudinaryKey: process.env.CLOUDINARY_API_KEY,
   cloudinarySecret: process.env.CLOUDINARY_API_SECRET,
+
+  // ANNOUNCE EMAIL TYPE
+  INVITED_TO_PROJECT: "invited to project",
+  KICKED_OUT_PROJECT: "kicked out project",
+  TASK_NEAR_DEADLINE: "task near deadline",
+  ASSIGNED_TO_TASK: "assigned to task",
+  UPDATE_ASSIGNED_TASK: "update assigned task",
+  ASSIGNED_TO_ANOTHER_PERSON: "assigned to another person",
+  TASK_UNASSIGNED: "task unassigned",
+  TASK_COMPLETE: "task complete",
+  TASK_OVERDUE: "task uncomplete",
+
+  //
+  DUE_DAYS_LIMIT: 2,
+  OVERDUE_DAYS_LIMIT: 2,
 };

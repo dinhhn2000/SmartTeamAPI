@@ -4,6 +4,9 @@ const models = require("../../../utils/Models");
 const transactions = require("../transactions/task.transaction");
 const validators = require("../../../utils/Validations/validations");
 const helpers = require("../../../utils/Helpers");
+const constants = require("../../../utils/Constants");
+const { sendEmail, createAnnounceEmail } = require("../../../utils/Email");
+const { Op } = require("sequelize");
 
 module.exports = {
   getTask: async (req, res, next) => {
@@ -151,8 +154,7 @@ module.exports = {
       if (!isAdmin) throw "This account is not the admin in this project";
 
       // Convert points to 0.25 format
-      if (req.body.points !== undefined)
-        req.body.points = helpers.roundPoints(req.body.points);
+      if (req.body.points !== undefined) req.body.points = helpers.roundPoints(req.body.points);
 
       // Check milestone
       let isMilestoneValid = false;
@@ -193,6 +195,21 @@ module.exports = {
       }
 
       await models.TaskModel.update(req.body, { where: { idTask }, raw: true });
+
+      // Send email to assigned member
+      if (taskRecord.idUser !== null) {
+        let memberInfo = await models.UserModel.findOne({
+          where: { idUser: taskRecord.idUser, email: { [Op.not]: null } },
+          raw: true,
+        });
+        if (!!memberInfo) {
+          let sendData = { taskName: taskRecord.name };
+          await sendEmail(
+            createAnnounceEmail(memberInfo.email, constants.UPDATE_ASSIGNED_TASK, sendData)
+          );
+        }
+      }
+
       return response.accepted(res, "Update task success");
     } catch (e) {
       return response.error(res, "Update task fail", e);
@@ -209,8 +226,7 @@ module.exports = {
       if (!taskRecord) throw "This task is not existed";
 
       // Check member
-      if (user.idUser !== taskRecord.idUser)
-        throw "This account is not assigned for this task";
+      if (user.idUser !== taskRecord.idUser) throw "This account is not assigned for this task";
 
       // Convert hh:mm to minutes
       let worked = workedTime.split(":"); // split it at the colons
@@ -285,8 +301,7 @@ module.exports = {
       if (!taskRecord) throw "This task is not existed";
 
       // Check member
-      if (user.idUser !== taskRecord.idUser)
-        throw "This account is not assigned for this task";
+      if (user.idUser !== taskRecord.idUser) throw "This account is not assigned for this task";
 
       await models.TaskModel.update(
         { workedTime: "00:00", remainTime: taskRecord.duration, progress: 0, state: 3 },
@@ -309,13 +324,30 @@ module.exports = {
       if (!taskRecord) throw "This task is not existed";
 
       // Check member
-      if (user.idUser !== taskRecord.idUser)
-        throw "This account is not assigned for this task";
+      if (user.idUser !== taskRecord.idUser) throw "This account is not assigned for this task";
 
       await models.TaskModel.update(
-        { workedTime, remainTime: "", progress: 100, state: 7 },
+        { workedTime, remainTime: "00:00", progress: 100, state: 7 },
         { where: { idTask }, raw: true }
       );
+
+      // Send to all admin of project
+      let adminIdList = await models.ProjectUserModel.findAll({
+        attributes: ["idUser"],
+        where: { idProject: taskRecord.idProject, idRole: 2 },
+        raw: true,
+      });
+      adminIdList = adminIdList.map((e) => e.idUser);
+
+      let adminEmailList = await models.UserModel.findAll({
+        attributes: ["email"],
+        where: { idUser: { [Op.in]: adminIdList }, email: { [Op.not]: null } },
+      });
+      adminEmailList = adminEmailList.map((e) => e.email);
+
+      let taskName = taskRecord.name;
+      await sendEmail(createAnnounceEmail(adminEmailList, constants.TASK_COMPLETE, { taskName }));
+
       return response.accepted(res, "End task success");
     } catch (e) {
       return response.error(res, "End task fail", e);

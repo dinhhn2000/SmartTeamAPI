@@ -1,10 +1,23 @@
 module.exports = {
   shortenName: (name) => {
-    return require("./shortName.helper").shortenName(name);
+    return name.replace(/\s/g, "");
   },
 
-  convertDateToDATE: (date, fieldName) => {
-    return require("./convertDateToDATE.helper").convertDateToDATE(date, fieldName);
+  convertTimestampToDATE: (date, fieldName) => {
+    try {
+      if (new Date(parseInt(date)).getTime() !== parseInt(date))
+        throw {
+          message: `${fieldName} is not in correct format, must be timestamp to miliseconds`,
+        };
+      let checkDate = moment(new Date(parseInt(date)));
+      if (checkDate.isValid()) {
+        const result = moment(new Date(parseInt(date))).format("YYYY-MM-DD");
+        return result;
+      }
+    } catch (e) {
+      if (e.message === undefined) throw e;
+      else throw e.message;
+    }
   },
 
   roundPoints: function (points) {
@@ -20,7 +33,10 @@ module.exports = {
 
   paginationQuery: (filter, query) => {
     // Handle custom filter in query
-    filter.where = { ...filter.where, ...query };
+    // Some issue:
+    // Cannot pass custom filter in query into filter.where
+    // Because there will be some custom fields for query not for filter
+    // filter.where = { ...filter.where, ...query };
 
     // Remove paginative property in filter
     delete filter.where.pageIndex;

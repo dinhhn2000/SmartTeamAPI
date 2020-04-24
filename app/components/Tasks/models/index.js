@@ -3,6 +3,7 @@ const { DataTypes, Deferrable } = require("sequelize");
 const withInterval = require("sequelize-interval-postgres");
 const db = require("../../../utils/DB");
 const helpers = require("../../../utils/Helpers");
+const { Op } = require("sequelize");
 
 const intervalDataTypes = withInterval(DataTypes);
 
@@ -145,5 +146,47 @@ module.exports = {
         "tasks"
       );
     else return Task.findAll(paginationQuery.query);
+  },
+  findNearDueDayTask: async (days) => {
+    const today = new Date();
+    const dueDay = new Date(today);
+    dueDay.setDate(dueDay.getDate() + days);
+
+    try {
+      return await Task.findAll({
+        where: {
+          finishedAt: {
+            [Op.gt]: today,
+            [Op.lt]: dueDay,
+          },
+          idUser: { [Op.not]: null },
+        },
+        order: [["idUser", "ASC"]],
+        raw: true,
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+  findOverdueTask: async (days) => {
+    const today = new Date();
+    const dueDay = new Date(today);
+    dueDay.setDate(dueDay.getDate() - days);
+
+    try {
+      return await Task.findAll({
+        where: {
+          finishedAt: {
+            [Op.lt]: today,
+            [Op.gt]: dueDay,
+          },
+          idUser: { [Op.not]: null },
+        },
+        order: [["idProject", "ASC"]],
+        raw: true,
+      });
+    } catch (error) {
+      throw error;
+    }
   },
 };

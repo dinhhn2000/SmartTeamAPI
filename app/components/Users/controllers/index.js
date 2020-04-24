@@ -9,7 +9,7 @@ const models = require("../../../utils/Models");
 const { bcrypt, getSalt } = require("../../../utils/Encrypt");
 const { JWT_SECRET, expireTime } = require("../../../utils/Constants");
 const { oauth, googleAuth } = require("../../../utils/Authentication/googleOauth");
-const { sendEmail, createMessage } = require("../../../utils/Email");
+const { sendEmail, createOtpEmail } = require("../../../utils/Email");
 
 function getToken(user) {
   let data = {
@@ -55,7 +55,7 @@ module.exports = {
               type: 1,
               email: user.email,
             });
-            const message = createMessage(email, otp, "Account verification");
+            const message = createOtpEmail(email, otp, "Account verification");
             sendEmail(message);
 
             return response.created(res, "Sign up successful");
@@ -166,7 +166,7 @@ module.exports = {
       // Send verify to email & create OTP
       const otp = Math.floor(Math.random() * 1000000 + 1);
       await models.OtpModel.create({ otp, type: 1, idUser: user.idUser, email });
-      const message = createMessage(email, otp, "Reset password OTP");
+      const message = createOtpEmail(email, otp, "Reset password OTP");
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
     } catch (e) {
@@ -187,7 +187,7 @@ module.exports = {
       // Send verify to email & create OTP
       const otp = Math.floor(Math.random() * 1000000 + 1);
       await models.OtpModel.create({ idUser: user.idUser, otp, type: 2 });
-      const message = createMessage(email, otp, "Reset password OTP");
+      const message = createOtpEmail(email, otp, "Reset password OTP");
       sendEmail(message);
       return response.success(res, "OTP has been sent to email");
     } catch (e) {
