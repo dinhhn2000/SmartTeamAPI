@@ -29,16 +29,13 @@ module.exports = {
         raw: true,
       });
       let teamListIndex = teamUserRecords.map((record) => record.idTeam);
-      let teamList = await models.TeamModelHelpers.findByIdTeamList(
-        teamListIndex,
-        req.query
-      );
-      if (req.query.pageIndex !== undefined && req.query.limit !== undefined)
-        teamList.teams = teamList.teams.map((team) => {
-          let index = teamListIndex.indexOf(team.idTeam);
-          team.idRole = teamUserRecords[index].idRole;
-          return team;
-        });
+      let teamList = await models.TeamModel.findByIdTeamList(teamListIndex, req.query);
+      let teams = teamList.teams !== undefined ? teamList.teams : teamList;
+      teams = teams.map((team) => {
+        let index = teamListIndex.indexOf(team.idTeam);
+        team.idRole = teamUserRecords[index].idRole;
+        return team;
+      });
 
       return response.success(res, "Get list of teams success", teamList);
     } catch (e) {
@@ -60,10 +57,7 @@ module.exports = {
       if (membersId.length === 0) throw "This team is not exist";
       membersId = membersId.map((e) => e.idUser);
       if (!membersId.includes(user.idUser)) throw "This account is not in this team";
-      let membersInfo = await models.UserModelHelpers.findByIdUserList(
-        membersId,
-        req.query
-      );
+      let membersInfo = await models.UserModel.findByIdUserList(membersId, req.query);
       return response.success(res, "Get list of members success", membersInfo);
     } catch (e) {
       return response.error(res, "Get list of team's member fail", e);

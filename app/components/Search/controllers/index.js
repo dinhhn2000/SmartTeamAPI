@@ -22,7 +22,7 @@ module.exports = {
       projectId = projectId.map((id) => id.idProject);
 
       // Get all project in this period
-      let projectList = await models.ProjectModelHelpers.findByTimeAndIdProjectList(
+      let projectList = await models.ProjectModel.findByTimeAndIdProjectList(
         projectId,
         from,
         to,
@@ -51,7 +51,7 @@ module.exports = {
       if (!validMember) throw response.success(res, "This account is not in this project");
 
       // Get all task in this period
-      let taskRecords = await models.TaskModelHelpers.findByTime(idProject, from, to, req.query);
+      let taskRecords = await models.TaskModel.findByTime(idProject, from, to, req.query);
 
       return response.success(res, "Search success", taskRecords);
     } catch (e) {
@@ -75,7 +75,7 @@ module.exports = {
       if (!validMember) throw response.success(res, "This account is not in this project");
 
       // Get all task in this period
-      let milestoneRecords = await models.MilestoneModelHelpers.findByTime(
+      let milestoneRecords = await models.MilestoneModel.findByTime(
         idProject,
         from,
         to,
@@ -104,7 +104,7 @@ module.exports = {
       projectId = projectId.map((id) => id.idProject);
 
       // Get all project in this priority range
-      let projectList = await models.ProjectModelHelpers.findByPriorityAndIdProjectList(
+      let projectList = await models.ProjectModel.findByPriorityAndIdProjectList(
         projectId,
         min,
         max,
@@ -132,7 +132,7 @@ module.exports = {
       projectId = projectId.map((id) => id.idProject);
 
       // Get all project in this priority range
-      let projectList = await models.ProjectModelHelpers.findByDueDayAndIdProjectList(
+      let projectList = await models.ProjectModel.findByDueDayAndIdProjectList(
         projectId,
         from,
         to,
@@ -161,7 +161,7 @@ module.exports = {
       if (!isMember) throw "This account is not in this project";
 
       // Get all tasks in this due days range
-      let taskList = await models.TaskModelHelpers.findByDueDayAndIdProject(
+      let taskList = await models.TaskModel.findByDueDayAndIdProject(
         idProject,
         from,
         to,
@@ -195,7 +195,7 @@ module.exports = {
       if (!isMember) throw "This account is not in this project";
 
       // Get all tasks in this due days range
-      let taskList = await models.TaskModelHelpers.findByIdMilestone(idMilestone, req.query);
+      let taskList = await models.TaskModel.findByIdMilestone(idMilestone, req.query);
 
       return response.success(res, "Search success", taskList);
     } catch (e) {
@@ -224,7 +224,7 @@ module.exports = {
       if (!isMember) throw "This account is not in this project";
 
       // Get all tasks in this due days range
-      let taskList = await models.TaskModelHelpers.findByIdMilestone(
+      let taskList = await models.TaskModel.findByIdMilestone(
         idMilestone,
         user.idUser,
         req.query
@@ -251,7 +251,7 @@ module.exports = {
       if (!members.includes(user.idUser)) throw "This account is not in this team";
 
       // Search user by email and idUser list
-      let userList = await models.UserModelHelpers.findByEmailAndIdUserList(
+      let userList = await models.UserModel.findByEmailAndIdUserList(
         members,
         email,
         req.query
@@ -278,7 +278,7 @@ module.exports = {
       if (!members.includes(user.idUser)) throw "This account is not in this team";
 
       // Search user by email and idUser list
-      let userList = await models.UserModelHelpers.findByNameAndIdUserList(
+      let userList = await models.UserModel.findByNameAndIdUserList(
         members,
         name,
         req.query
@@ -305,7 +305,7 @@ module.exports = {
       if (!members.includes(user.idUser)) throw "This account is not in this team";
 
       // Search user by email and idUser list
-      let userList = await models.UserModelHelpers.findByNameAndIdUserList(
+      let userList = await models.UserModel.findByNameAndIdUserList(
         members,
         name,
         req.query

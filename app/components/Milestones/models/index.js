@@ -25,35 +25,33 @@ const Milestone = db.sequelize.define("Milestones", {
   finishedAt: { allowNull: false, type: DataTypes.DATE },
 });
 
-module.exports = {
-  Milestone,
-  findByIdProject: async (idProject, query) => {
-    const filter = { where: { idProject } };
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Milestone.findAndCountAll(paginationQuery.query),
-        "milestones"
-      );
-    else return Milestone.findAll(paginationQuery.query);
-  },
-  findByTime: async (idProject, from, to, query) => {
-    const filter = {
-      where: {
-        idProject,
-        finishedAt: { [Op.gte]: from },
-        startedAt: { [Op.lte]: to },
-      },
-    };
+module.exports = Milestone;
+module.exports.findByIdProject = async (idProject, query) => {
+  const filter = { where: { idProject } };
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Milestone.findAndCountAll(paginationQuery.query),
+      "milestones"
+    );
+  else return Milestone.findAll(paginationQuery.query);
+};
+module.exports.findByTime = async (idProject, from, to, query) => {
+  const filter = {
+    where: {
+      idProject,
+      finishedAt: { [Op.gte]: from },
+      startedAt: { [Op.lte]: to },
+    },
+  };
 
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Task.findAndCountAll(paginationQuery.query),
-        "milestones"
-      );
-    else return Task.findAll(paginationQuery.query);
-  },
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Task.findAndCountAll(paginationQuery.query),
+      "milestones"
+    );
+  else return Task.findAll(paginationQuery.query);
 };

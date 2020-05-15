@@ -33,7 +33,7 @@ module.exports = {
       // "* * * * *", // Debug every minute
       async () => {
         try {
-          let taskList = await models.TaskModelHelpers.findNearDueDayTask(constants.DUE_DAYS_LIMIT);
+          let taskList = await models.TaskModel.findNearDueDayTask(constants.DUE_DAYS_LIMIT);
           console.log(taskList);
           if (taskList.length === 0) return;
 
@@ -65,7 +65,7 @@ module.exports = {
       // "* * * * *", // Debug every minute
       async () => {
         try {
-          let taskList = await models.TaskModelHelpers.findOverdueTask(
+          let taskList = await models.TaskModel.findOverdueTask(
             constants.OVERDUE_DAYS_LIMIT
           );
           console.log(taskList);

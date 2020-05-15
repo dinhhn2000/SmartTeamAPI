@@ -50,10 +50,7 @@ module.exports = {
   },
 
   validateAccessToken: (access_token) => {
-    let validation = new Validator(
-      { access_token },
-      { access_token: rules.required.access_token }
-    );
+    let validation = new Validator({ access_token }, { access_token: rules.required.access_token });
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
@@ -115,15 +112,7 @@ module.exports = {
   },
 
   validateUpdateProjectInfo: (projectInfo) => {
-    let {
-      idProject,
-      name,
-      description,
-      priority,
-      startedAt,
-      finishedAt,
-      state,
-    } = projectInfo;
+    let { idProject, name, description, priority, startedAt, finishedAt, state } = projectInfo;
     let validation = new Validator(
       { idProject, name, description, priority, startedAt, finishedAt, state },
       {
@@ -143,6 +132,14 @@ module.exports = {
   validateHhMm: (input) => {
     var isValid = /^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$/.test(input);
     return isValid;
+  },
+
+  validateCheckListInfo: ({ name, idTask }) => {
+    let validation = new Validator(
+      { name, idTask },
+      { name: rules.required.name, idTask: rules.required.id }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
   validateTaskInfo: ({

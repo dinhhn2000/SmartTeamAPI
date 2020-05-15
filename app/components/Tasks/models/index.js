@@ -73,120 +73,118 @@ const Task = db.sequelize.define("Tasks", {
   },
 });
 
-module.exports = {
-  Task,
-  findByTime: async (idProject, from, to, query) => {
-    const filter = {
+module.exports = Task;
+module.exports.findByTime = async (idProject, from, to, query) => {
+  const filter = {
+    where: {
+      idProject,
+      finishedAt: { [Op.gte]: from },
+      startedAt: { [Op.lte]: to },
+    },
+  };
+
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Task.findAndCountAll(paginationQuery.query),
+      "tasks"
+    );
+  else return Task.findAll(paginationQuery.query);
+};
+module.exports.findByDueDayAndIdProject = async (idProject, from, to, query) => {
+  const filter = {
+    where: {
+      idProject,
+      finishedAt: { [Op.gte]: from },
+      finishedAt: { [Op.lte]: to },
+    },
+  };
+
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Task.findAndCountAll(paginationQuery.query),
+      "tasks"
+    );
+  else return Task.findAll(paginationQuery.query);
+};
+module.exports.findByIdProject = async (idProject, query) => {
+  const filter = { where: { idProject } };
+
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Task.findAndCountAll(paginationQuery.query),
+      "tasks"
+    );
+  else return Task.findAll(paginationQuery.query);
+};
+module.exports.findByIdMilestone = async (idMilestone, query) => {
+  const filter = { where: { idMilestone } };
+
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Task.findAndCountAll(paginationQuery.query),
+      "tasks"
+    );
+  else return Task.findAll(paginationQuery.query);
+};
+module.exports.findByIdMilestoneAndIdUser = async (idMilestone, idUser, query) => {
+  const filter = { where: { idMilestone, idUser } };
+
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Task.findAndCountAll(paginationQuery.query),
+      "tasks"
+    );
+  else return Task.findAll(paginationQuery.query);
+};
+module.exports.findNearDueDayTask = async (days) => {
+  const today = new Date();
+  const dueDay = new Date(today);
+  dueDay.setDate(dueDay.getDate() + days);
+
+  try {
+    return await Task.findAll({
       where: {
-        idProject,
-        finishedAt: { [Op.gte]: from },
-        startedAt: { [Op.lte]: to },
+        finishedAt: {
+          [Op.gt]: today,
+          [Op.lt]: dueDay,
+        },
+        idUser: { [Op.not]: null },
       },
-    };
+      order: [["idUser", "ASC"]],
+      raw: true,
+    });
+  } catch (error) {
+    throw error;
+  }
+};
+module.exports.findOverdueTask = async (days) => {
+  const today = new Date();
+  const dueDay = new Date(today);
+  dueDay.setDate(dueDay.getDate() - days);
 
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Task.findAndCountAll(paginationQuery.query),
-        "tasks"
-      );
-    else return Task.findAll(paginationQuery.query);
-  },
-  findByDueDayAndIdProject: async (idProject, from, to, query) => {
-    const filter = {
+  try {
+    return await Task.findAll({
       where: {
-        idProject,
-        finishedAt: { [Op.gte]: from },
-        finishedAt: { [Op.lte]: to },
+        finishedAt: {
+          [Op.lt]: today,
+          [Op.gt]: dueDay,
+        },
+        idUser: { [Op.not]: null },
       },
-    };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Task.findAndCountAll(paginationQuery.query),
-        "tasks"
-      );
-    else return Task.findAll(paginationQuery.query);
-  },
-  findByIdProject: async (idProject, query) => {
-    const filter = { where: { idProject } };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Task.findAndCountAll(paginationQuery.query),
-        "tasks"
-      );
-    else return Task.findAll(paginationQuery.query);
-  },
-  findByIdMilestone: async (idMilestone, query) => {
-    const filter = { where: { idMilestone } };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Task.findAndCountAll(paginationQuery.query),
-        "tasks"
-      );
-    else return Task.findAll(paginationQuery.query);
-  },
-  findByIdMilestoneAndIdUser: async (idMilestone, idUser, query) => {
-    const filter = { where: { idMilestone, idUser } };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Task.findAndCountAll(paginationQuery.query),
-        "tasks"
-      );
-    else return Task.findAll(paginationQuery.query);
-  },
-  findNearDueDayTask: async (days) => {
-    const today = new Date();
-    const dueDay = new Date(today);
-    dueDay.setDate(dueDay.getDate() + days);
-
-    try {
-      return await Task.findAll({
-        where: {
-          finishedAt: {
-            [Op.gt]: today,
-            [Op.lt]: dueDay,
-          },
-          idUser: { [Op.not]: null },
-        },
-        order: [["idUser", "ASC"]],
-        raw: true,
-      });
-    } catch (error) {
-      throw error;
-    }
-  },
-  findOverdueTask: async (days) => {
-    const today = new Date();
-    const dueDay = new Date(today);
-    dueDay.setDate(dueDay.getDate() - days);
-
-    try {
-      return await Task.findAll({
-        where: {
-          finishedAt: {
-            [Op.lt]: today,
-            [Op.gt]: dueDay,
-          },
-          idUser: { [Op.not]: null },
-        },
-        order: [["idProject", "ASC"]],
-        raw: true,
-      });
-    } catch (error) {
-      throw error;
-    }
-  },
+      order: [["idProject", "ASC"]],
+      raw: true,
+    });
+  } catch (error) {
+    throw error;
+  }
 };

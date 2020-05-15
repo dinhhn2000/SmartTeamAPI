@@ -43,7 +43,7 @@ module.exports = {
       });
       if (!isInProject) throw "This account is not in this project";
 
-      let milestoneList = await models.MilestoneModelHelpers.findByIdProject(
+      let milestoneList = await models.MilestoneModel.findByIdProject(
         idProject,
         req.query
       );

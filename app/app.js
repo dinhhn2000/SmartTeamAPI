@@ -12,6 +12,7 @@ const cloud_name = process.env.CLOUDINARY_CLOUD_NAME;
 const api_key = process.env.CLOUDINARY_API_KEY;
 const api_secret = process.env.CLOUDINARY_API_SECRET;
 require("./utils/Authentication/passport");
+require("./utils/Models").associate();
 
 const routes = require("./routes");
 const users = require("./components/Users/routes");
@@ -19,6 +20,7 @@ const projects = require("./components/Projects/routes");
 const teams = require("./components/Teams/routes");
 const tasks = require("./components/Tasks/routes");
 const milestones = require("./components/Milestones/routes");
+const checkLists = require("./components/CheckLists/routes");
 const search = require("./components/Search/routes");
 
 var app = express();
@@ -46,6 +48,7 @@ app.use("/projects", projects);
 app.use("/teams", teams);
 app.use("/tasks", tasks);
 app.use("/milestones", milestones);
+app.use("/checkLists", checkLists);
 app.use("/search", search);
 
 // Auto run daily check

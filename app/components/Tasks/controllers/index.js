@@ -43,7 +43,7 @@ module.exports = {
       });
       if (!isInProject) throw "This project not exist";
 
-      let taskList = await models.TaskModelHelpers.findByIdProject(idProject, req.query);
+      let taskList = await models.TaskModel.findByIdProject(idProject, req.query);
 
       return response.success(res, "Get list of tasks success", taskList);
     } catch (e) {

@@ -61,6 +61,28 @@ module.exports = {
         result: "FAIL",
       });
   },
+  errorNoMessage: (response, error) => {
+    console.log(error);
+    if (Array.isArray(error)) error = error[0];
+    if (typeof error !== "undefined")
+      if (typeof error.message === "undefined")
+        return response.status(400).json({
+          dbError: error.dbError,
+          result: "FAIL",
+          error: error.payload,
+        });
+      else
+        return response.status(400).json({
+          dbError: error.dbError,
+          result: "FAIL",
+          error: error.payload.message,
+        });
+    else
+      return response.status(400).json({
+        dbError: error.dbError,
+        result: "FAIL",
+      });
+  },
   unauthorized: (response, message) => {
     return response.status(401).json({
       message,

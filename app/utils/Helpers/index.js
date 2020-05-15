@@ -33,14 +33,14 @@ module.exports = {
 
   paginationQuery: (filter, query) => {
     // Handle custom filter in query
+    // filter.where = { ...filter.where, ...query };
     // Some issue:
     // Cannot pass custom filter in query into filter.where
     // Because there will be some custom fields for query not for filter
-    // filter.where = { ...filter.where, ...query };
 
     // Remove paginative property in filter
-    delete filter.where.pageIndex;
-    delete filter.where.limit;
+    // delete filter.where.pageIndex;
+    // delete filter.where.limit;
 
     if (query.pageIndex !== undefined && query.limit !== undefined)
       return {
@@ -48,12 +48,11 @@ module.exports = {
         pageIndex: query.pageIndex,
         query: {
           ...filter,
-          raw: true,
           offset: (query.pageIndex - 1) * query.limit,
           limit: query.limit,
         },
       };
-    else return { hasPagination: false, query: { ...filter, raw: true } };
+    else return { hasPagination: false, query: { ...filter } };
   },
 
   listStructure: (currentPage, data, dataName) => {
@@ -62,5 +61,15 @@ module.exports = {
       totalRecords: data.count,
       [dataName]: data.rows,
     };
+  },
+
+  handlePaginationQueryReturn: async (paginationQuery, model, dataName) => {
+    if (paginationQuery.hasPagination)
+      return module.exports.listStructure(
+        paginationQuery.pageIndex,
+        await model.findAndCountAll(paginationQuery.query),
+        dataName
+      );
+    else return await model.findAll(paginationQuery.query);
   },
 };

@@ -62,71 +62,38 @@ const Project = db.sequelize.define(
   { indexes: [{ unique: true, fields: ["name", "idTeam"] }] }
 );
 
-module.exports = {
-  Project,
-  findByTimeAndIdProjectList: async (idList, from, to, query) => {
-    const filter = {
-      where: {
-        idProject: { [Op.in]: idList },
-        finishedAt: { [Op.gte]: from },
-        startedAt: { [Op.lte]: to },
-      },
-    };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Project.findAndCountAll(paginationQuery.query),
-        "projects"
-      );
-    else return Project.findAll(paginationQuery.query);
-  },
-  findByDueDayAndIdProjectList: async (idList, from, to, query) => {
-    const filter = {
-      where: {
-        idProject: { [Op.in]: idList },
-        finishedAt: { [Op.gte]: from },
-        finishedAt: { [Op.lte]: to },
-      },
-    };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Project.findAndCountAll(paginationQuery.query),
-        "projects"
-      );
-    else return Project.findAll(paginationQuery.query);
-  },
-  findByPriorityAndIdProjectList: async (idList, min, max, query) => {
-    const filter = {
-      where: {
-        idProject: { [Op.in]: idList },
-        priority: { [Op.between]: [min, max] },
-      },
-    };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Project.findAndCountAll(paginationQuery.query),
-        "projects"
-      );
-    else return Project.findAll(paginationQuery.query);
-  },
-  findByIdProjectList: async (idList, query) => {
-    const filter = { where: { idProject: { [Op.in]: idList } } };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Project.findAndCountAll(paginationQuery.query),
-        "projects"
-      );
-    else return Project.findAll(paginationQuery.query);
-  },
+module.exports = Project;
+module.exports.findByTimeAndIdProjectList = async (idList, from, to, query) => {
+  const filter = {
+    where: {
+      idProject: { [Op.in]: idList },
+      finishedAt: { [Op.gte]: from },
+      startedAt: { [Op.lte]: to },
+    },
+  };
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  return helpers.handlePaginationQueryReturn(paginationQuery, Project, "projects");
+};
+module.exports.findByDueDayAndIdProjectList = async (idList, from, to, query) => {
+  const filter = {
+    where: {
+      idProject: { [Op.in]: idList },
+      finishedAt: { [Op.gte]: from },
+      finishedAt: { [Op.lte]: to },
+    },
+  };
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  return helpers.handlePaginationQueryReturn(paginationQuery, Project, "projects");
+};
+module.exports.findByPriorityAndIdProjectList = async (idList, min, max, query) => {
+  const filter = {
+    where: { idProject: { [Op.in]: idList }, priority: { [Op.between]: [min, max] } },
+  };
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  return helpers.handlePaginationQueryReturn(paginationQuery, Project, "projects");
+};
+module.exports.findByIdProjectList = async (idList, query) => {
+  const filter = { where: { idProject: { [Op.in]: idList } }, raw: true };
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  return helpers.handlePaginationQueryReturn(paginationQuery, Project, "projects");
 };

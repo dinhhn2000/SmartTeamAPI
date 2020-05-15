@@ -2,6 +2,7 @@
 const { DataTypes, Deferrable, Op } = require("sequelize");
 const db = require("../../../utils/DB");
 const helpers = require("../../../utils/Helpers");
+const TeamUserModel = require("../../TeamUser/models");
 
 const Team = db.sequelize.define(
   "Teams",
@@ -32,32 +33,17 @@ const Team = db.sequelize.define(
   { indexes: [{ unique: true, fields: ["name", "creator"] }] }
 );
 
-module.exports = {
-  Team,
-  findByIdTeamList: async (idList, query) => {
-    const filter = { where: { idTeam: { [Op.in]: idList } } };
+module.exports = Team;
+module.exports.findByIdTeamList = async (idList, query) => {
+  const filter = { where: { idTeam: { [Op.in]: idList } }, raw: true };
 
-    let paginationQuery = helpers.paginationQuery(filter, query);
+  let paginationQuery = helpers.paginationQuery(filter, query);
 
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Team.findAndCountAll(paginationQuery.query),
-        "teams"
-      );
-    else return Team.findAll(paginationQuery.query);
-  },
-  findByEmail: async (email, query) => {
-    const filter = { where: { idTeam: { [Op.in]: idList } } };
-
-    let paginationQuery = helpers.paginationQuery(filter, query);
-
-    if (paginationQuery.hasPagination)
-      return helpers.listStructure(
-        paginationQuery.pageIndex,
-        await Team.findAndCountAll(paginationQuery.query),
-        "teams"
-      );
-    else return Team.findAll(paginationQuery.query);
-  },
+  if (paginationQuery.hasPagination)
+    return helpers.listStructure(
+      paginationQuery.pageIndex,
+      await Team.findAndCountAll(paginationQuery.query),
+      "teams"
+    );
+  else return Team.findAll(paginationQuery.query);
 };

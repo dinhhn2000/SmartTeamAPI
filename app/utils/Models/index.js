@@ -1,33 +1,45 @@
 "use strict";
 module.exports = {
   associate: () => {
-    // TeamUserModel.belongsTo(TeamModel, { foreignKey: "idTeam" });
-    // TeamUserModel.belongsTo(UserModel, { foreignKey: "idUser" });
-    // TeamModel.hasMany(TeamUserModel, { foreignKey: "idTeam", as: "" });
-    // UserModel.hasMany(TeamUserModel, { foreignKey: "idUser", as: "" });
+    // CheckList $ CheckListItems
+    let CheckListModel = module.exports.CheckListModel;
+    let CheckListItemModel = module.exports.CheckListItemModel;
+    CheckListModel.hasMany(CheckListItemModel, { foreignKey: "idCheckList" });
+    CheckListItemModel.belongsTo(CheckListModel, { foreignKey: "idCheckList" });
+
+    // Teams & Role
+    let TeamModel = module.exports.TeamModel;
+    let TeamUserModel = module.exports.TeamUserModel;
+    TeamModel.hasMany(TeamUserModel, { foreignKey: "idTeam" });
+    TeamUserModel.belongsTo(TeamModel, { foreignKey: "idTeam" });
   },
   // Original models
   OtpModel: require("../../components/Otps/models"),
   PriorityModel: require("../../components/Priorities/models"),
   ProjectUserModel: require("../../components/ProjectUser/models"),
-  ProjectModel: require("../../components/Projects/models").Project,
+  ProjectModel: require("../../components/Projects/models"),
   RoleModel: require("../../components/Roles/models"),
   StateModel: require("../../components/States/models"),
   TeamUserModel: require("../../components/TeamUser/models"),
-  TeamModel: require("../../components/Teams/models").Team,
-  UserModel: require("../../components/Users/models").User,
-  TaskModel: require("../../components/Tasks/models").Task,
+  TeamModel: require("../../components/Teams/models"),
+  UserModel: require("../../components/Users/models"),
+  TaskModel: require("../../components/Tasks/models"),
   TaskTypeModel: require("../../components/TaskType/models"),
-  MilestoneModel: require("../../components/Milestones/models").Milestone,
-
-  // Helpers for models
-  ProjectModelHelpers: require("../../components/Projects/models"),
-  TeamModelHelpers: require("../../components/Teams/models"),
-  TaskModelHelpers: require("../../components/Tasks/models"),
-  MilestoneModelHelpers: require("../../components/Milestones/models"),
-  UserModelHelpers: require("../../components/Users/models"),
+  MilestoneModel: require("../../components/Milestones/models"),
+  CheckListModel: require("../../components/CheckLists/models"),
+  CheckListItemModel: require("../../components/CheckListItems/models"),
 
   // Some format in models
-  excludeFieldsForUserInfo: require("../../components/Users/models")
-    .excludeFieldsForUserInfo,
+  excludeFieldsForUserInfo: [
+    "email",
+    "password",
+    "gender",
+    "dob",
+    "googleId",
+    "facebookId",
+    "is_verified",
+  ],
+
+  // Raw queries
+  sequelize: require("../DB").sequelize,
 };
