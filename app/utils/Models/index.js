@@ -35,9 +35,17 @@ module.exports = {
     "password",
     "gender",
     "dob",
-    "googleId",
-    "facebookId",
+    `"googleId"`,
+    `"facebookId"`,
     "is_verified",
+  ],
+  includeFieldsForUserInfo: [
+    `"idUser"`,
+    `"firstName"`,
+    `"lastName"`,
+    "avatar",
+    `"createdAt"`,
+    `"updatedAt"`,
   ],
 
   // Raw queries

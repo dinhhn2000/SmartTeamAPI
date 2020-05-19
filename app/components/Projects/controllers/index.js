@@ -54,26 +54,43 @@ module.exports = {
     if (!projectInfo) throw "This project is not exist";
     let { idTeam } = projectInfo;
 
-    // Get projects' members id
-    let memberInProject = await models.ProjectUserModel.findAll({
-      attributes: ["idUser"],
-      where: { idProject },
-      raw: true,
-    });
-    memberInProject = memberInProject.map((e) => e.idUser);
-    if (!memberInProject.includes(user.idUser)) throw "This account is not in this project";
+    // // Get projects' members id
+    // let memberInProject = await models.ProjectUserModel.findAll({
+    //   attributes: ["idUser"],
+    //   where: { idProject },
+    //   raw: true,
+    // });
+    // memberInProject = memberInProject.map((e) => e.idUser);
+    // if (!memberInProject.includes(user.idUser)) throw "This account is not in this project";
 
-    // Get all team's members
-    let memberInTeam = await models.TeamUserModel.findAll({
-      attributes: ["idUser"],
-      where: { idTeam },
-      raw: true,
-    });
-    memberInTeam = memberInTeam.map((e) => e.idUser);
-    let memberNotInProject = memberInTeam.filter((id) => !memberInProject.includes(id));
+    // // Get all team's members
+    // let memberInTeam = await models.TeamUserModel.findAll({
+    //   attributes: ["idUser"],
+    //   where: { idTeam },
+    //   raw: true,
+    // });
+    // memberInTeam = memberInTeam.map((e) => e.idUser);
+    // let memberNotInProject = memberInTeam.filter((id) => !memberInProject.includes(id));
 
-    // Get members' info
-    let membersInfo = await models.UserModel.findByIdUserList(memberNotInProject, req.query);
+    // // Get members' info
+    // let membersInfo = await models.UserModel.findByIdUserList(memberNotInProject, req.query);
+
+    let rawQuery = `SELECT ${models.includeFieldsForUserInfo} FROM "Users" u
+    WHERE u."idUser" IN 
+      (
+        SELECT tu."idUser" 
+        FROM "TeamUser" tu
+        WHERE "idTeam" = ${idTeam}
+      ) 
+    AND u."idUser" NOT IN 
+      (
+        SELECT pu."idUser"
+        FROM "ProjectUser" pu
+        WHERE pu."idProject" = ${idProject}
+      )`;
+    let membersInfo = await models.sequelize.query(rawQuery, {
+      type: models.sequelize.QueryTypes.SELECT,
+    });
 
     return response.success(res, "Get list of members success", membersInfo);
   },

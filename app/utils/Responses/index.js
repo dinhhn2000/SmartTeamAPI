@@ -62,7 +62,6 @@ module.exports = {
       });
   },
   errorNoMessage: (response, error) => {
-    console.log(error);
     if (Array.isArray(error)) error = error[0];
     if (typeof error !== "undefined")
       if (typeof error.message === "undefined")
