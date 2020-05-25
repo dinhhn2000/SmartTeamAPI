@@ -2,6 +2,7 @@
 
 const { DataTypes, Deferrable, Op } = require("sequelize");
 const db = require("../../../utils/DB");
+const helpers = require("../../../utils/Helpers");
 
 const CheckListItem = db.sequelize.define("CheckListItems", {
   idCheckListItem: {
@@ -33,3 +34,12 @@ const CheckListItem = db.sequelize.define("CheckListItems", {
 });
 
 module.exports = CheckListItem;
+module.exports.findByIdCheckList = async (idCheckList, query) => {
+  const filter = {
+    where: { idCheckList },
+    include: CheckListItem,
+  };
+
+  let paginationQuery = helpers.paginationQuery(filter, query);
+  return helpers.handlePaginationQueryReturn(paginationQuery, CheckListItem, "checkListItems");
+};

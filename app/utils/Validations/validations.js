@@ -102,7 +102,7 @@ module.exports = {
         name: rules.required.name,
         description: rules.non_required.description,
         priority: rules.required.priority,
-        idTeam: rules.required.idTeam,
+        idTeam: rules.required.id,
         finishedAt: rules.non_required.date,
         startedAt: rules.required.date,
       }
@@ -138,6 +138,19 @@ module.exports = {
     let validation = new Validator(
       { name, idTask },
       { name: rules.required.name, idTask: rules.required.id }
+    );
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
+  validateCheckListItemInfo: ({ content, idCheckList, finishedAt, idUser }) => {
+    let validation = new Validator(
+      { content, idCheckList, finishedAt, idUser },
+      {
+        content: rules.required.content,
+        idCheckList: rules.required.id,
+        finishedAt: rules.non_required.date,
+        idUser: rules.non_required.id,
+      }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
@@ -272,7 +285,7 @@ module.exports = {
   validateTeamMembers: (idTeam, members) => {
     let validation = new Validator(
       { idTeam, members },
-      { idTeam: rules.required.idTeam, members: rules.required.members }
+      { idTeam: rules.required.id, members: rules.required.members }
     );
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
