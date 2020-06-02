@@ -76,17 +76,17 @@ module.exports = {
     // let membersInfo = await models.UserModel.findByIdUserList(memberNotInProject, req.query);
 
     let rawQuery = `SELECT ${models.includeFieldsForUserInfo} FROM "Users" u
-    WHERE u."idUser" IN 
+    WHERE EXISTS
       (
         SELECT tu."idUser" 
         FROM "TeamUser" tu
-        WHERE "idTeam" = ${idTeam}
+        WHERE "idTeam" = ${idTeam} AND u."idUser" = tu."idUser"
       ) 
-    AND u."idUser" NOT IN 
+    AND NOT EXISTS 
       (
         SELECT pu."idUser"
         FROM "ProjectUser" pu
-        WHERE pu."idProject" = ${idProject}
+        WHERE pu."idProject" = ${idProject} AND u."idUser" = pu."idUser"
       )`;
     let membersInfo = await models.sequelize.query(rawQuery, {
       type: models.sequelize.QueryTypes.SELECT,
