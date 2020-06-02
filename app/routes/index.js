@@ -1,10 +1,14 @@
 "use strict";
-var express = require('express');
+var express = require("express");
 var router = express.Router();
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Smart Team API' });
+router.get("/", function (req, res, next) {
+  res.render("index", { title: "Smart Team API" });
+});
+
+router.get("/welcome", function (req, res, next) {
+  res.send("Hello to smart team API");
 });
 
 module.exports = router;

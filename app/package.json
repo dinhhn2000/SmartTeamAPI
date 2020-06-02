@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "nodemon ./bin/www"
+    "start": "nodemon ./bin/www",
+    "test": "mocha"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -33,5 +34,10 @@
     "sequelize-interval-postgres": "^1.0.0",
     "serve-favicon": "^2.5.0",
     "validatorjs": "^3.18.1"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^7.2.0",
+    "request": "^2.88.2"
   }
 }
