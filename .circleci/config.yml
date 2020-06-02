@@ -13,9 +13,9 @@ jobs:
             # - run: cd app/ && npm install
             - run: cd app/ && cp ./.env.example ./.env
             # - run: cd app/ && npm start
-            - run: sudo groupadd docker
-            - run: sudo usermod -aG docker root
-            - run: sudo service docker restart
+            # - run: sudo groupadd docker
+            # - run: sudo usermod -aG docker root
+            # - run: sudo service docker restart
             - run: sudo docker-compose up --build
 workflows:
   build-and-test:
