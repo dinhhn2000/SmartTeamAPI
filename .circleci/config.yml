@@ -12,9 +12,10 @@ jobs:
       # - setup_remote_docker
       - node/with-cache:
           steps:
-            # - run: cd app/ && npm install
+            - run: cd app/ && npm install
             - run: cd app/ && cp ./.env.example ./.env
-            # - run: cd app/ && npm start
+            - run: cd app/ && npm start
+            - run: cd app/ && npm test
             # - run: cd app/ && git add .
 
 workflows:
