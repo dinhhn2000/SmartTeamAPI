@@ -1,6 +1,3 @@
 /app/node_modules
-/app/config/config.json
 /app/.env
-/app/.sequelizerc
-Dockerfile
 /.vscode
