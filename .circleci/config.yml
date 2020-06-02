@@ -9,9 +9,8 @@ jobs:
       - checkout
       - node/with-cache:
           steps:
-            - run: cd app/
-            - run: npm install
-            - run: npm start
+            - run: cd app/ && npm install
+            - run: cd app/ && npm start
 workflows:
   build-and-test:
     jobs:
