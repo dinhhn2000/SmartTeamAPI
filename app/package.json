@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "test": "mocha"
+    "start-server": "node ./bin/www",
+    "test": "mocha",
+    "ci": "start-server-and-test start-server http://localhost:3000 test"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "mocha": "^7.2.0",
-    "request": "^2.88.2"
+    "request": "^2.88.2",
+    "start-server-and-test": "^1.11.0"
   }
 }
