@@ -3,7 +3,7 @@
     "username": "postgres",
     "password": "123456",
     "database": "smartteam",
-    "host": "db",
+    "host": "localhost",
     "dialect": "postgres",
     "operatorsAliases": "0"
   },
