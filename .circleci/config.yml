@@ -10,7 +10,7 @@ jobs:
       - node/with-cache:
           steps:
             # - run: cd app/ && npm install
-            # - run: cd app/ && cp ./.env.example ./.env
+            - run: cd app/ && cp ./.env.example ./.env
             # - run: cd app/ && npm start
             - run: docker-compose up --build
 workflows:
