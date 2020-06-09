@@ -2,6 +2,7 @@
 const jwt = require("jsonwebtoken");
 const response = require("../../../utils/Responses");
 const cloudinary = require("cloudinary").v2;
+const path = require("path");
 
 const validators = require("../../../utils/Validations/validations");
 const { UserModel } = require("../../../utils/Models");
@@ -12,11 +13,11 @@ function getToken(user) {
     idUser: user.idUser,
     firstName: user.firstName,
     lastName: user.lastName,
-    avatar: user.avatar
+    avatar: user.avatar,
   };
 
   const token = jwt.sign(data, JWT_SECRET, {
-    expiresIn: expireTime + "m"
+    expiresIn: expireTime + "m",
   });
 
   return token;
@@ -56,40 +57,22 @@ module.exports = {
     try {
       const { user } = req;
       // console.log(req.file.path);
+      let avatarUrl = user.avatar;
+      avatarUrl = avatarUrl.split("/");
+      avatarUrl = avatarUrl[avatarUrl.length - 1];
+      avatarUrl = avatarUrl.split(".")[0];
+      
+      let removeResult = await cloudinary.uploader.destroy(avatarUrl);
+      // console.log(removeResult);
 
-      let uploadResult = await cloudinary.uploader.upload(req.file.path);
-      await UserModel.update(
-        { avatar: uploadResult.url },
-        { where: { idUser: user.idUser } }
-      );
+      let uploadResult = await cloudinary.uploader.upload(req.file.path, {
+        resource_type: "image",
+      });
+      await UserModel.update({ avatar: uploadResult.url }, { where: { idUser: user.idUser } });
 
       return response.success(res, "Update avatar success", uploadResult.url);
     } catch (e) {
       return response.error(res, "Something's wrong  when update avatar", e);
     }
-  }
-  // setRole: async (req, res, next) => {
-  //   const { user } = req;
-  //   const { idUser, idRole } = req.body;
-  //   try {
-  //     let userRoleRecord = await UserRoleModel.findOne({
-  //       where: { idUser: user.idUser }
-  //     });
-  //     userRoleRecord = !!userRoleRecord ? userRoleRecord.dataValues : null;
-  //     if (userRoleRecord === null) throw "Your account do not have role";
-  //     if (!idUser || !idRole) throw "Missing idUser or idRole";
-  //     if (userRoleRecord.idRole <= idRole) {
-  //       const upsertResult = await UserRoleModel.upsert(
-  //         { idUser: idUser, idRole: idRole },
-  //         { idRole: idRole, idUser: idUser }
-  //       );
-  //       if (upsertResult) {
-  //         return response.accepted(res, "Set role success");
-  //       } else throw "Upsert role failed";
-  //     } else throw "Cannot set higher role than yours for this user";
-  //   } catch (e) {
-  //
-  //     return response.error(res, "Cannot set role", e);
-  //   }
-  // }
+  },
 };

@@ -28,6 +28,7 @@ module.exports = {
   MilestoneModel: require("../../components/Milestones/models"),
   CheckListModel: require("../../components/CheckLists/models"),
   CheckListItemModel: require("../../components/CheckListItems/models"),
+  MediaDataModel: require("../../components/MediaDatas/models"),
 
   // Some format in models
   excludeFieldsForUserInfo: [
@@ -43,7 +44,7 @@ module.exports = {
     `"idUser"`,
     `"firstName"`,
     `"lastName"`,
-    "avatar",
+    `"avatar"`,
     `"createdAt"`,
     `"updatedAt"`,
   ],

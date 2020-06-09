@@ -22,6 +22,7 @@ const tasks = require("./components/Tasks/routes");
 const milestones = require("./components/Milestones/routes");
 const checkLists = require("./components/CheckLists/routes");
 const search = require("./components/Search/routes");
+const mediaData = require("./components/MediaDatas/routes");
 
 var app = express();
 
@@ -50,6 +51,7 @@ app.use("/tasks", tasks);
 app.use("/milestones", milestones);
 app.use("/checkLists", checkLists);
 app.use("/search", search);
+app.use("/media-datas", mediaData);
 
 // Auto run daily check
 let autoJobs = require("./utils/AutoTasks");

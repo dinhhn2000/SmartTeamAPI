@@ -155,6 +155,11 @@ module.exports = {
     if (validation.fails()) throw firstError(validation.errors.errors);
   },
 
+  validateMediaDataInfo: ({ idTask }) => {
+    let validation = new Validator({ idTask }, { idTask: rules.required.id });
+    if (validation.fails()) throw firstError(validation.errors.errors);
+  },
+
   validateTaskInfo: ({
     idProject,
     idMilestone,
