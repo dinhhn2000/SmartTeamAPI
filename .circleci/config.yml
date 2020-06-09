@@ -5,17 +5,14 @@ jobs:
   build-and-test:
     executor:
       name: node/default
-    # docker:
-    #   - image: circleci/node:13.10.1
     steps:
       - checkout
-      # - setup_remote_docker
       - node/with-cache:
           steps:
             - run: cd app/ && npm install
             - run: cd app/ && cp ./.env.example ./.env
             - run: cd app/ && npm run ci
-            # - run: cd app/ && git add .
+            - run: git subtree push --prefix app heroku master
 
 workflows:
   build-and-test:
