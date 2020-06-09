@@ -12,10 +12,7 @@ jobs:
             - run: cd app/ && npm install
             - run: cd app/ && cp ./.env.example ./.env
             - run: cd app/ && npm run ci
-            - run:
-              name: Deploy Master to Heroku
-              command: |
-                git push https://heroku:$66f33cf7-914b-4782-ad7d-c4e6aef5aa3c@git.heroku.com/$smart-team-api.git master
+            - run: git push https://heroku:$66f33cf7-914b-4782-ad7d-c4e6aef5aa3c@git.heroku.com/$smart-team-api.git master
     
 workflows:
   build-and-test:
